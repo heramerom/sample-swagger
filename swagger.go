@@ -18,16 +18,15 @@ var verbose = flag.Bool("v", false, "verbose")
 
 var out = flag.String("o", "sample-swagger", "out put dir")
 
-func debug(f, l, m string) {
+func debug(msg ...interface{}) {
 	if *verbose {
-		fmt.Printf("file: %s, line: %s, msg: %s\n", f, l, m)
+		fmt.Println(msg...)
 	}
 }
 
 func main() {
 
 	flag.Parse()
-	fmt.Println("out: ", *out)
 	args := flag.Args()
 	if len(args) == 0 {
 		fmt.Println("please input path")
@@ -36,10 +35,8 @@ func main() {
 	api := NewApi()
 
 	for _, path := range args {
-		fmt.Println(path)
 		b, err := isDirectory(path)
 		if err != nil {
-			fmt.Println("open file error: ", path, err.Error())
 			continue
 		}
 		if b {
@@ -58,7 +55,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(api.Json())
 	dumpFile(api)
 }
 
@@ -93,8 +89,6 @@ func dumpFile(api *Api) {
 	str = strings.Replace(str, "{{GeneratorJson}}", "`"+js+"`", 1)
 	str = strings.Replace(str, "{{Imports}}", api.DefinitionImports(), 1)
 	str = strings.Replace(str, "{{GeneratorModels}}", api.DefinitionObjects(), 1)
-	fmt.Println("defines:", api.definitions)
-	fmt.Println("objs:", api.DefinitionObjects())
 	err = writeFile("vars.go", []byte(str))
 	if err != nil {
 		fmt.Println("write file error: ", err.Error())
@@ -148,7 +142,9 @@ func parseFile(f string, api *Api) {
 
 	scanner := bufio.NewScanner(file)
 	var currentRouter = emptyRouter
+	num := 0
 	for scanner.Scan() {
+		num++
 		line := scanner.Text()
 		if !strings.Contains(line, "@sw:") {
 			continue
@@ -171,14 +167,11 @@ func parseFile(f string, api *Api) {
 				continue
 			}
 			currentRouter.params = append(currentRouter.params, parseParam(params))
-			fmt.Println("params: ", parseParam(params))
 		case "response", "resp", "res", "re":
 			if reflect.DeepEqual(currentRouter, emptyRouter) {
 				continue
 			}
-			fmt.Println()
 			currentRouter.response = append(currentRouter.response, parseResponse(params))
-			fmt.Println(parseResponse(params))
 		case "model", "m":
 			def := parseModel(params)
 			if reflect.DeepEqual(def, definition{}) {
@@ -195,11 +188,10 @@ func parseFile(f string, api *Api) {
 			api.swagger.Host = strings.TrimSpace(params)
 
 		default:
-			fmt.Println("unsupport cmd: ", cmd)
+			debug("file:", f, "line:", num, "unsupport command:", cmd)
 		}
 	}
 	if !reflect.DeepEqual(currentRouter, emptyRouter) {
-		fmt.Println("....", currentRouter)
 		api.AddRouters(currentRouter)
 	}
 }

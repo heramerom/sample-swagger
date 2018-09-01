@@ -37,7 +37,6 @@ func parse() string {
 			swagger.Definitions = make(map[string]*Definition)
 		}
 		name, definition := v.toDefinition()
-		fmt.Println(name, definition)
 		if definition != nil {
 			swagger.Definitions[name] = definition
 		}
@@ -161,9 +160,7 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 	case reflect.Map:
 		f.Type = typeMap
 		v, t := indirectType(typ.Key())
-		fmt.Println(v.String(), t.Kind().String())
 		km := parseDefines(&v, t)
-		fmt.Println(fd.Name, km)
 		f.KeyObject = &km
 		v, t = indirectType(typ.Elem())
 		vm := parseDefines(&v, t)
@@ -192,7 +189,6 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Array:
 		if v.IsNil() {
 			v, t := indirectType(t)
-			fmt.Println("value:", v.String(), "type:", t.String())
 			return parseDefines(&v, t)
 		}
 	}

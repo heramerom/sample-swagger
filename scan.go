@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	models "github.com/heramerom/sample-swagger/template"
 	"strconv"
 	"strings"
@@ -25,7 +24,6 @@ func (r *router) toMethod() models.Method {
 	router.Summary = r.desc
 	router.Tags = strings.Split(r.tag, "/")
 	for _, v := range r.params {
-		fmt.Println(v)
 		router.Parameters = append(router.Parameters, v.toParameters())
 	}
 	router.Responses = responses(r.response).toResponses()
@@ -52,7 +50,6 @@ func (p *param) toParameters() models.Parameter {
 		Description: p.desc,
 		Required:    require,
 	}
-	fmt.Println(parameter)
 	return parameter
 }
 
@@ -169,12 +166,11 @@ type definition struct {
 	desc  string
 }
 
-// @sw:m import_path,package,tag,desc
+// @sw:m import_path,package,desc
 func parseModel(line string) definition {
 	var def definition
 	def.path, line = scanNext(line, ',')
 	def.model, line = scanNext(line, ',')
-	def.tag, line = scanNext(line, ',')
 	def.desc = line
 	return def
 }
