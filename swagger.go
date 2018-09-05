@@ -140,12 +140,12 @@ func parseFile(f string, api *Api) {
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	fileScanner := bufio.NewScanner(file)
 	var currentRouter = emptyRouter
 	num := 0
-	for scanner.Scan() {
+	for fileScanner.Scan() {
 		num++
-		line := scanner.Text()
+		line := fileScanner.Text()
 		if !strings.Contains(line, "@sw:") {
 			continue
 		}
@@ -154,38 +154,39 @@ func parseFile(f string, api *Api) {
 			continue
 		}
 		line = strings.Replace(line, "//", "", 1)
-		cmd, params := scanNext(line, ' ', '\t')
+		scanner := newScanner(line, f, num)
+		cmd := scanner.nextString(' ', '\t')
 		cmd = strings.Replace(cmd, "@sw:", "", 1)
 		switch strings.ToLower(cmd) {
 		case "router", "r":
 			if !reflect.DeepEqual(currentRouter, emptyRouter) {
 				api.AddRouters(currentRouter)
 			}
-			currentRouter = parseRouter(params)
+			currentRouter = parseRouter(scanner)
 		case "param", "p":
 			if reflect.DeepEqual(currentRouter, emptyRouter) {
 				continue
 			}
-			currentRouter.params = append(currentRouter.params, parseParam(params))
+			currentRouter.params = append(currentRouter.params, parseParam(scanner))
 		case "response", "resp", "res", "re":
 			if reflect.DeepEqual(currentRouter, emptyRouter) {
 				continue
 			}
-			currentRouter.response = append(currentRouter.response, parseResponse(params))
+			currentRouter.response = append(currentRouter.response, parseResponse(scanner))
 		case "model", "m":
-			def := parseModel(params)
+			def := parseModel(scanner)
 			if reflect.DeepEqual(def, definition{}) {
 				continue
 			}
 			api.AddDefinitions(def)
 		case "swagger":
-			api.swagger.Swagger = strings.TrimSpace(params)
+			api.swagger.Swagger = scanner.nextString()
 		case "info", "i":
-			parseInfo(api, params)
+			parseInfo(api, scanner)
 		case "basepath":
-			api.swagger.BasePath = strings.TrimSpace(params)
+			api.swagger.BasePath = scanner.nextString()
 		case "host":
-			api.swagger.Host = strings.TrimSpace(params)
+			api.swagger.Host = scanner.nextString()
 
 		default:
 			debug("file:", f, "line:", num, "unsupport command:", cmd)
@@ -195,13 +196,12 @@ func parseFile(f string, api *Api) {
 		api.AddRouters(currentRouter)
 	}
 }
-func parseInfo(api *Api, line string) {
-	line = strings.TrimSpace(line)
-	next, line := scanNext(line, ',')
+func parseInfo(api *Api, s *Scanner) {
 	if api.swagger.Info == nil {
 		api.swagger.Info = &template.Info{}
 	}
-	line = strings.TrimSpace(line)
+	next := s.nextString(',')
+	line := s.nextString()
 	switch strings.ToLower(next) {
 	case "description", "desc":
 		api.swagger.Info.Description = line
@@ -218,5 +218,4 @@ func parseInfo(api *Api, line string) {
 	case "license.url":
 		api.swagger.Info.License.URL = line
 	}
-
 }

@@ -10,3 +10,13 @@ type Class struct {
 	Name     string
 	Students []Student
 }
+
+type Base struct {
+	Name string
+}
+
+// @sw:m github.com/heramerom/sample-swagger/example/model, model.Sub,
+type Sub struct {
+	Base
+	Age int
+}

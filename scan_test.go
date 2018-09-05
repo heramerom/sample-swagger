@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -36,4 +37,26 @@ func TestFile(t *testing.T) {
 		t.Log(sc.Text())
 	}
 
+}
+
+func TestScanner(t *testing.T) {
+
+	line := `@sw:p token, "header" , , 'string' , true, "desc", a , d, 'b, c, d'`
+	s := newScanner(line, "", 1)
+	next := s.nextString(' ', '\t')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString(',')
+	fmt.Println(next)
+	next = s.nextString()
+	fmt.Println(next)
 }
