@@ -37,7 +37,7 @@ func parse() string {
 			swagger.Definitions = make(map[string]*Definition)
 		}
 		name, definition := v.toDefinition()
-		if definition != nil {
+		if definition != nil && name != "" {
 			swagger.Definitions[name] = definition
 		}
 	}
@@ -62,6 +62,21 @@ type model struct {
 	Fields      []field `json:",omitempty"`
 }
 
+func (m model) expandFields() []field {
+	var fds []field
+	for _, f := range m.Fields {
+		if f.Anonymous && f.Object != nil {
+			pm, ok := definitions[f.Object.Name]
+			if ok {
+				fds = append(fds, pm.expandFields()...)
+			}
+		} else {
+			fds = append(fds, f)
+		}
+	}
+	return fds
+}
+
 func (m model) toDefinition() (name string, definition *Definition) {
 
 	if isNestedObject(m.Name) {
@@ -73,7 +88,8 @@ func (m model) toDefinition() (name string, definition *Definition) {
 	d.Type = m.Type
 	if len(m.Fields) > 0 {
 		ps := make(map[string]Property, len(m.Fields))
-		for _, v := range m.Fields {
+		fds := m.expandFields()
+		for _, v := range fds {
 			p := Property{}
 			p.Type = v.Type
 
@@ -127,6 +143,8 @@ type field struct {
 	KeyObject   *model `json:",omitempty"`
 	ValueObject *model `json:",omitempty"`
 	Object      *model `json:",omitempty"`
+
+	Anonymous bool
 }
 
 func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *field {
@@ -135,6 +153,7 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 	if f.Name == "-" {
 		return nil
 	}
+	f.Anonymous = fd.Anonymous
 	if f.Name == "" {
 		f.Name = fd.Name
 	}
@@ -207,6 +226,8 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 		}
 		return v
 	}
+	// block dead loop
+	definitions[key] = model{Name: key, Type: typeObject}
 
 	var m model
 	switch t.Kind() {

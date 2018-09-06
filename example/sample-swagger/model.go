@@ -25,15 +25,17 @@ type Router struct {
 	Responses   map[string]Response `json:"responses"`
 }
 
+type Schema struct {
+	Ref string `json:"$ref,omitempty"`
+}
+
 type Parameter struct {
-	In          string `json:"in"`
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Description string `json:"description"`
-	Required    bool   `json:"required"`
-	Schema      *struct {
-		Ref string `json:"$ref"`
-	} `json:"schema,omitempty"`
+	In          string  `json:"in"`
+	Name        string  `json:"name"`
+	Type        string  `json:"type"`
+	Description string  `json:"description"`
+	Required    bool    `json:"required"`
+	Schema      *Schema `json:"schema,omitempty"`
 }
 
 type Response struct {
@@ -77,3 +79,23 @@ type Swagger struct {
 }
 
 type Method map[string]Router
+
+func MapType(typ string) string {
+	switch typ {
+	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
+		return "integer"
+	case "string", "str", "s":
+		return "string"
+	case "bool", "boolean", "b":
+		return "boolean"
+	case "object", "obj", "o":
+		return "object"
+	case "float32", "float64":
+		return "number"
+	case "array", "slice":
+		return "array"
+	case "map":
+		return "map"
+	}
+	return "{}" // any
+}

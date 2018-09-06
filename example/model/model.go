@@ -20,3 +20,10 @@ type Sub struct {
 	Base
 	Age int
 }
+
+// @sw:m github.com/heramerom/sample-swagger/example/model, model.Self,
+type Self struct {
+	Value string
+	Left  *Self
+	Right *Self
+}

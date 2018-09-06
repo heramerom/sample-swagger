@@ -9,4 +9,5 @@ var generatorJson = `{"swagger":"","info":{"description":"hello world","version"
 var generatorModels = []interface{}{
 	new(sw_model.Class),
 	new(sw_model.Sub),
+	new(sw_model.Self),
 }
