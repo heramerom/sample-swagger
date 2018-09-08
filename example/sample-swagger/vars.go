@@ -10,4 +10,6 @@ var generatorModels = []interface{}{
 	new(sw_model.Class),
 	new(sw_model.Sub),
 	new(sw_model.Self),
+	new(sw_model.NestObject),
+	new(sw_model.ArrayObject),
 }

@@ -50,22 +50,30 @@ type Response struct {
 }
 
 type Property struct {
-	Type        string          `json:"type,omitempty"`
-	Format      string          `json:"format,omitempty"`
-	Description string          `json:"description,omitempty"`
-	Ref         string          `json:"$ref,omitempty"`
-	Items       *Property       `json:"items,omitempty"`
-	Properties  *NestedProperty `json:"properties,omitempty"`
+	Type        string      `json:"type,omitempty"`
+	Format      string      `json:"format,omitempty"`
+	Description string      `json:"description,omitempty"`
+	Ref         string      `json:"$ref,omitempty"`
+	Items       *Definition `json:"items,omitempty"`
+	Properties  *Definition `json:"properties,omitempty"`
+
+	AdditionalProperties *AdditionalProperties `json:"additionalProperties,omitempty"`
+}
+
+type AdditionalProperties struct {
+	Type string `json:"type"`
+	Ref  string `json:"$ref"`
 }
 
 type NestedProperty struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type Definition struct {
-	Type       string              `json:"type"`
-	Properties map[string]Property `json:"properties"`
+	Type       string              `json:"type,omitempty"`
+	Properties map[string]Property `json:"properties,omitempty"`
+	Ref        string              `json:"$ref,omitempty"`
 }
 
 type Swagger struct {

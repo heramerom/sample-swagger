@@ -9,12 +9,17 @@ import (
 
 const (
 	typeString = "string"
-	typeInt    = "int"
+	typeInt    = "integer"
 	typeNumber = "number"
 	typeObject = "object"
 	typeArray  = "array"
 	typeMap    = "map"
 )
+
+var buildInTypes = map[string]string{
+	"time.Time":  "string",
+	"*time.Time": "string",
+}
 
 var definitions = make(map[string]model)
 
@@ -36,7 +41,7 @@ func parse() string {
 		if swagger.Definitions == nil {
 			swagger.Definitions = make(map[string]*Definition)
 		}
-		name, definition := v.toDefinition()
+		name, definition := v.toDefinition(false)
 		if definition != nil && name != "" {
 			swagger.Definitions[name] = definition
 		}
@@ -53,17 +58,16 @@ func parse() string {
 }
 
 type model struct {
-	Name        string
-	Type        string
-	Description string  `json:",omitempty"`
-	ItemObject  *model  `json:",omitempty"`
-	KeyObject   *model  `json:",omitempty"`
-	ValueObject *model  `json:",omitempty"`
-	Fields      []field `json:",omitempty"`
+	Name   string
+	Type   string
+	Object *model   `json:"object"`
+	Fields []*model `json:",omitempty"` // properties
+
+	Anonymous bool
 }
 
-func (m model) expandFields() []field {
-	var fds []field
+func (m *model) expandFields() []*model {
+	var fds []*model
 	for _, f := range m.Fields {
 		if f.Anonymous && f.Object != nil {
 			pm, ok := definitions[f.Object.Name]
@@ -77,78 +81,82 @@ func (m model) expandFields() []field {
 	return fds
 }
 
-func (m model) toDefinition() (name string, definition *Definition) {
+func (m *model) toDefinition(ref bool) (name string, definition *Definition) {
 
-	if isNestedObject(m.Name) {
+	if m == nil {
 		return
 	}
-	name = m.Name
 
 	var d Definition
+	name = m.Name
 	d.Type = m.Type
-	if len(m.Fields) > 0 {
-		ps := make(map[string]Property, len(m.Fields))
-		fds := m.expandFields()
-		for _, v := range fds {
-			p := Property{}
-			p.Type = v.Type
 
-			if v.Type == typeObject {
-				if v.Object != nil {
-					if isNestedObject(v.Object.Name) {
-						// nested object
-					} else {
-						p.Ref = "#/definitions/" + v.Object.Name
-					}
+	switch m.Type {
+	case typeObject:
+		if ref {
+			if m.Object != nil {
+				if isBaseDefinitions(m.Object.Type) {
+					return m.Name, &Definition{Type: m.Object.Type}
+				}
+				if !isNestedObject(m.Object.Name) {
+					return m.Name, &Definition{Type: typeObject, Ref: "#/definitions/" + m.Object.Name}
+				}
+			} else {
+				if isBaseDefinitions(m.Type) {
+					return m.Name, &Definition{Type: m.Type}
+				}
+				if !isNestedObject(m.Name) {
+					return m.Name, &Definition{Type: typeObject, Ref: "#/definitions/" + m.Name}
 				}
 			}
-
-			if v.Type == typeArray {
-				ref := "#/definitions/" + v.ItemObject.Name
-				if v.ItemObject.Name == "" {
-					ref = ""
-				}
-				p.Items = &Property{
-					Type: v.ItemObject.Type,
-					Ref:  ref,
-				}
-			}
-
-			if v.Type == typeMap {
-				p.Type = typeObject
-				p.Properties = &NestedProperty{
-					Id:   v.KeyObject.Type,
-					Name: v.ValueObject.Type,
-				}
-			}
-
-			ps[v.Name] = p
 		}
-		d.Properties = ps
+
+		if m.Object != nil {
+			_, d := m.Object.toDefinition(true)
+			return m.Name, d
+		} else {
+			if len(m.Fields) > 0 {
+				ps := make(map[string]*Definition, len(m.Fields))
+				fds := m.expandFields()
+				for _, v := range fds {
+					_, ps[v.Name] = v.toDefinition(true)
+				}
+				d.Properties = ps
+			}
+		}
+
+	case typeArray:
+		if m.Object != nil {
+			_, d := m.Object.toDefinition(true)
+			return m.Name, &Definition{Type: typeArray, Items: d}
+		}
+	case typeMap:
+		if m.Object != nil {
+			_, d := m.Object.toDefinition(true)
+			return m.Name, &Definition{Type: typeObject, AdditionalProperties: d}
+		}
 	}
 	definition = &d
-
 	return
+}
+
+func isBaseDefinitions(typ string) bool {
+	switch typ {
+	case typeObject, typeArray, typeMap:
+		return false
+	}
+	return true
 }
 
 func isNestedObject(name string) bool {
 	return strings.Contains(name, "struct {")
 }
 
-type field struct {
-	Name        string
-	Type        string
-	Desc        string `json:",omitempty"`
-	ItemObject  *model `json:",omitempty"`
-	KeyObject   *model `json:",omitempty"`
-	ValueObject *model `json:",omitempty"`
-	Object      *model `json:",omitempty"`
-
-	Anonymous bool
-}
-
-func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *field {
-	var f field
+func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *model {
+	if fd.Name[0] > 'Z' || fd.Name[0] < 'A' {
+		return nil
+	}
+	var f model
 	f.Name = strings.Split(fd.Tag.Get("json"), ",")[0]
 	if f.Name == "-" {
 		return nil
@@ -165,6 +173,10 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 	case reflect.Float32, reflect.Float64:
 		f.Type = typeNumber
 	case reflect.Struct:
+		if buildIn, ok := buildInTypes[typ.String()]; ok {
+			f.Type = buildIn
+			break
+		}
 		f.Type = typeObject
 		m := parseDefines(&value, typ)
 		f.Object = &m
@@ -173,17 +185,17 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 		return parseField(v, t, fd)
 	case reflect.Array, reflect.Slice:
 		f.Type = typeArray
-		v, t := indirectType(fd.Type)
+		fmt.Println("name-->", fd.Type.Elem())
+		v, t := indirectType(fd.Type.Elem())
+		fmt.Println("name-->", t)
 		m := parseDefines(&v, t)
-		f.ItemObject = &m
+		f.Object = &m
 	case reflect.Map:
 		f.Type = typeMap
-		v, t := indirectType(typ.Key())
-		km := parseDefines(&v, t)
-		f.KeyObject = &km
-		v, t = indirectType(typ.Elem())
+		v, t := indirectType(fd.Type.Elem())
+		fmt.Println("typ:", t)
 		vm := parseDefines(&v, t)
-		f.ValueObject = &vm
+		f.Object = &vm
 	}
 	return &f
 }
@@ -194,7 +206,7 @@ func nameOfType(t reflect.Type) string {
 
 func indirectType(t reflect.Type) (reflect.Value, reflect.Type) {
 	switch t.Kind() {
-	case reflect.Ptr, reflect.Array, reflect.Slice, reflect.Map:
+	case reflect.Ptr:
 		return reflect.Indirect(reflect.New(t.Elem())), t.Elem()
 	}
 	return reflect.Indirect(reflect.New(t)), t
@@ -204,8 +216,9 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 	if v == nil {
 		return model{}
 	}
+
 	switch t.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Array:
+	case reflect.Ptr:
 		if v.IsNil() {
 			v, t := indirectType(t)
 			return parseDefines(&v, t)
@@ -242,32 +255,31 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 	case reflect.Struct:
 		m.Name = key
 		m.Type = typeObject
-		var fields []field
+		var fields []*model
 		for i := 0; i < v.NumField(); i++ {
 			v := v.Field(i)
 			f := parseField(v, t.Field(i).Type, t.Field(i))
 			if f == nil {
 				continue
 			}
-			fields = append(fields, *f)
+			fields = append(fields, f)
 		}
 		m.Fields = fields
 	case reflect.Array, reflect.Slice:
 		m.Type = typeArray
+		fmt.Println("name->", t.Elem().Name())
 		v, t := indirectType(t.Elem())
 		mm := parseDefines(&v, t)
-		m.ItemObject = &mm
+		m.Object = &mm
 	case reflect.Map:
 		m.Type = typeMap
-		v, t := indirectType(t.Key())
+		v, t := indirectType(t.Elem())
+		fmt.Println("typ:", t)
 		mm := parseDefines(&v, t)
-		m.KeyObject = &mm
-		v, t = indirectType(t.Elem())
-		mm = parseDefines(&v, t)
-		m.ValueObject = &mm
+		m.Object = &mm
 	}
 	definitions[key] = m
-	if m.Type == typeObject && !strings.Contains(m.Name, "struct { ") {
+	if m.Type == typeObject && !isNestedObject(m.Name) {
 		return model{Name: m.Name, Type: m.Type}
 	}
 	return m
