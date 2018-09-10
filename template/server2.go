@@ -1,6 +1,6 @@
 // +build !sample_swagger
 
-package sample_swagger
+package template
 
 import "net/http"
 

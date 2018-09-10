@@ -56,6 +56,9 @@ func main() {
 	}
 
 	dumpFile(api)
+
+	fmt.Println("success!")
+
 }
 
 func dumpFile(api *Api) {
@@ -63,6 +66,7 @@ func dumpFile(api *Api) {
 	err := os.MkdirAll(*out, 0777)
 	if err != nil {
 		fmt.Printf("mkdir error: %s", err.Error())
+		os.Exit(1)
 	}
 
 	js := api.Json()
@@ -70,19 +74,29 @@ func dumpFile(api *Api) {
 	tm, _ := base64.StdEncoding.DecodeString(templateModelBase64)
 	err = writeFile("model.go", tm)
 	if err != nil {
-		fmt.Println("write file error: ", err.Error())
+		fmt.Println("write file error:", err.Error())
+		os.Exit(1)
 	}
 
 	pm, _ := base64.StdEncoding.DecodeString(templateParseBase64)
 	err = writeFile("parse.go", pm)
 	if err != nil {
-		fmt.Println("write file error: ", err.Error())
+		fmt.Println("write file error:", err.Error())
+		os.Exit(1)
 	}
 
 	sm, _ := base64.StdEncoding.DecodeString(templateServerBase64)
 	err = writeFile("server.go", sm)
 	if err != nil {
-		fmt.Println("write file error: ", err.Error())
+		fmt.Println("write file error:", err.Error())
+		os.Exit(1)
+	}
+
+	s2m, _ := base64.StdEncoding.DecodeString(templateServer2Base64)
+	err = writeFile("server2.go", s2m)
+	if err != nil {
+		fmt.Println("write file error:", err.Error())
+		os.Exit(1)
 	}
 
 	str := templateVars
@@ -92,6 +106,7 @@ func dumpFile(api *Api) {
 	err = writeFile("vars.go", []byte(str))
 	if err != nil {
 		fmt.Println("write file error: ", err.Error())
+		os.Exit(1)
 	}
 }
 
