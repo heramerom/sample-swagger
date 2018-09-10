@@ -1,3 +1,5 @@
+// +build sample_swagger
+
 package template
 
 type Info struct {
@@ -71,11 +73,13 @@ type NestedProperty struct {
 }
 
 type Definition struct {
-	Type       string              `json:"type,omitempty"`
-	Properties map[string]Property `json:"properties,omitempty"`
-	Ref        string              `json:"$ref,omitempty"`
+	Type                 string                 `json:"type,omitempty"`
+	Format               string                 `json:"format,omitempty"`
+	Items                *Definition            `json:"items,omitempty"`
+	Properties           map[string]*Definition `json:"properties,omitempty"`
+	AdditionalProperties *Definition            `json:"additionalProperties,omitempty"`
+	Ref                  string                 `json:"$ref,omitempty"`
 }
-
 type Swagger struct {
 	Swagger     string                 `json:"swagger"`
 	Info        *Info                  `json:"info"`

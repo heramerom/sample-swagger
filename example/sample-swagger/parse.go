@@ -1,3 +1,5 @@
+// +build sample_swagger
+
 package sample_swagger
 
 import (
@@ -10,6 +12,7 @@ import (
 const (
 	typeString = "string"
 	typeInt    = "integer"
+	typeBool   = "boolean"
 	typeNumber = "number"
 	typeObject = "object"
 	typeArray  = "array"
@@ -86,6 +89,9 @@ func (m *model) toDefinition(ref bool) (name string, definition *Definition) {
 	if m == nil {
 		return
 	}
+	if !ref && isBaseDefinitions(m.Type) {
+		return m.Type, nil
+	}
 
 	var d Definition
 	name = m.Name
@@ -110,6 +116,9 @@ func (m *model) toDefinition(ref bool) (name string, definition *Definition) {
 				}
 			}
 		}
+		if !ref && isNestedObject(name) {
+			return m.Name, nil
+		}
 
 		if m.Object != nil {
 			_, d := m.Object.toDefinition(true)
@@ -124,7 +133,6 @@ func (m *model) toDefinition(ref bool) (name string, definition *Definition) {
 				d.Properties = ps
 			}
 		}
-
 	case typeArray:
 		if m.Object != nil {
 			_, d := m.Object.toDefinition(true)
@@ -168,10 +176,13 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 	switch typ.Kind() {
 	case reflect.String:
 		f.Type = typeString
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		f.Type = typeInt
 	case reflect.Float32, reflect.Float64:
 		f.Type = typeNumber
+	case reflect.Bool:
+		f.Type = typeBool
 	case reflect.Struct:
 		if buildIn, ok := buildInTypes[typ.String()]; ok {
 			f.Type = buildIn
@@ -185,15 +196,12 @@ func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *
 		return parseField(v, t, fd)
 	case reflect.Array, reflect.Slice:
 		f.Type = typeArray
-		fmt.Println("name-->", fd.Type.Elem())
 		v, t := indirectType(fd.Type.Elem())
-		fmt.Println("name-->", t)
 		m := parseDefines(&v, t)
 		f.Object = &m
 	case reflect.Map:
 		f.Type = typeMap
 		v, t := indirectType(fd.Type.Elem())
-		fmt.Println("typ:", t)
 		vm := parseDefines(&v, t)
 		f.Object = &vm
 	}
@@ -240,7 +248,7 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 		return v
 	}
 	// block dead loop
-	definitions[key] = model{Name: key, Type: typeObject}
+	definitions[key] = sampleModel(key, t)
 
 	var m model
 	switch t.Kind() {
@@ -248,10 +256,17 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 		m.Name = typeString
 		m.Type = typeString
 		return m
-	case reflect.Int:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		m.Name = typeInt
 		m.Type = typeInt
 		return m
+	case reflect.Float32, reflect.Float64:
+		m.Name = typeNumber
+		m.Type = typeNumber
+	case reflect.Bool:
+		m.Name = typeBool
+		m.Type = typeBool
 	case reflect.Struct:
 		m.Name = key
 		m.Type = typeObject
@@ -283,4 +298,21 @@ func parseDefines(v *reflect.Value, t reflect.Type) model {
 		return model{Name: m.Name, Type: m.Type}
 	}
 	return m
+}
+
+func sampleModel(key string, t reflect.Type) model {
+	switch t.Kind() {
+	case reflect.String:
+		return model{Name: key, Type: typeString}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return model{Name: key, Type: typeInt}
+	case reflect.Float32, reflect.Float64:
+		return model{Name: key, Type: typeNumber}
+	case reflect.Bool:
+		return model{Name: key, Type: typeBool}
+	default:
+		return model{Name: key, Type: typeObject}
+	}
+	return model{}
 }

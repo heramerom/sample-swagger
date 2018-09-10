@@ -1,3 +1,5 @@
+// +build sample_swagger
+
 package template
 
 import (

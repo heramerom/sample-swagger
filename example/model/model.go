@@ -11,6 +11,11 @@ type Student struct {
 type Class struct {
 	Name     string
 	Students []Student
+	Map      map[string]int
+	Map2     map[string]Student
+	Map3     map[string]struct {
+		Int int `json:"int"`
+	}
 }
 
 type Base struct {
@@ -25,6 +30,12 @@ type Sub struct {
 	unExportField string
 
 	BirthDay time.Time `json:"birth_day"`
+
+	Map  map[string]int
+	Map2 map[string]struct {
+		Name string `json:"name"`
+	} `json:"map_2"`
+	Map3 map[string]*Class
 }
 
 // @sw:m github.com/heramerom/sample-swagger/example/model, model.Self,
