@@ -44,4 +44,3 @@ go run -tags sample_swagger main.go
 ```
 
 5. access the swagger *http://location/swagger.html*
-
