@@ -1,25 +1,555 @@
 package main
 
-var templateModelBase64 = "Ly8gK2J1aWxkIHNhbXBsZV9zd2FnZ2VyCgpwYWNrYWdlIHNhbXBsZV9zd2FnZ2VyCgp0eXBlIEluZm8gc3RydWN0IHsKCURlc2NyaXB0aW9uICAgIHN0cmluZyBganNvbjoiZGVzY3JpcHRpb24iYAoJVmVyc2lvbiAgICAgICAgc3RyaW5nIGBqc29uOiJ2ZXJzaW9uImAKCVRpdGxlICAgICAgICAgIHN0cmluZyBganNvbjoidGl0bGUiYAoJVGVybXNPZlNlcnZpY2Ugc3RyaW5nIGBqc29uOiJ0ZXJtc09mU2VydmljZSJgCglDb250YWN0ICAgICAgICBzdHJ1Y3QgewoJCUVtYWlsIHN0cmluZyBganNvbjoiZW1haWwiYAoJfSBganNvbjoiY29udGFjdCJgCglMaWNlbnNlIHN0cnVjdCB7CgkJTmFtZSBzdHJpbmcgYGpzb246Im5hbWUiYAoJCVVSTCAgc3RyaW5nIGBqc29uOiJ1cmwiYAoJfSBganNvbjoibGljZW5zZSJgCn0KCnR5cGUgUm91dGVyIHN0cnVjdCB7CglUYWdzICAgICAgICBbXXN0cmluZyAgICAgICAgICAgIGBqc29uOiJ0YWdzImAKCVN1bW1hcnkgICAgIHN0cmluZyAgICAgICAgICAgICAgYGpzb246InN1bW1hcnkiYAoJRGVzY3JpcHRpb24gc3RyaW5nICAgICAgICAgICAgICBganNvbjoiZGVzY3JpcHRpb24iYAoJT3BlcmF0aW9uSUQgc3RyaW5nICAgICAgICAgICAgICBganNvbjoib3BlcmF0aW9uSWQiYAoJQ29uc3VtZXMgICAgW11zdHJpbmcgICAgICAgICAgICBganNvbjoiY29uc3VtZXMiYAoJUHJvZHVjZXMgICAgW11zdHJpbmcgICAgICAgICAgICBganNvbjoicHJvZHVjZXMiYAoJUGFyYW1ldGVycyAgW11QYXJhbWV0ZXIgICAgICAgICBganNvbjoicGFyYW1ldGVycyJgCglSZXNwb25zZXMgICBtYXBbc3RyaW5nXVJlc3BvbnNlIGBqc29uOiJyZXNwb25zZXMiYAp9Cgp0eXBlIFNjaGVtYSBzdHJ1Y3QgewoJUmVmIHN0cmluZyBganNvbjoiJHJlZixvbWl0ZW1wdHkiYAp9Cgp0eXBlIFBhcmFtZXRlciBzdHJ1Y3QgewoJSW4gICAgICAgICAgc3RyaW5nICBganNvbjoiaW4iYAoJTmFtZSAgICAgICAgc3RyaW5nICBganNvbjoibmFtZSJgCglUeXBlICAgICAgICBzdHJpbmcgIGBqc29uOiJ0eXBlImAKCURlc2NyaXB0aW9uIHN0cmluZyAgYGpzb246ImRlc2NyaXB0aW9uImAKCVJlcXVpcmVkICAgIGJvb2wgICAgYGpzb246InJlcXVpcmVkImAKCVNjaGVtYSAgICAgICpTY2hlbWEgYGpzb246InNjaGVtYSxvbWl0ZW1wdHkiYAp9Cgp0eXBlIFJlc3BvbnNlIHN0cnVjdCB7CglEZXNjcmlwdGlvbiBzdHJpbmcgYGpzb246ImRlc2NyaXB0aW9uImAKCVNjaGVtYSAgICAgIHN0cnVjdCB7CgkJVHlwZSAgc3RyaW5nIGBqc29uOiJ0eXBlImAKCQlJdGVtcyBzdHJ1Y3QgewoJCQlSZWYgc3RyaW5nIGBqc29uOiIkcmVmImAKCQl9IGBqc29uOiJpdGVtcyJgCgkJUmVmIHN0cmluZyBganNvbjoiJHJlZiJgCgl9IGBqc29uOiJzY2hlbWEiYAp9Cgp0eXBlIFByb3BlcnR5IHN0cnVjdCB7CglUeXBlICAgICAgICBzdHJpbmcgICAgICBganNvbjoidHlwZSxvbWl0ZW1wdHkiYAoJRm9ybWF0ICAgICAgc3RyaW5nICAgICAgYGpzb246ImZvcm1hdCxvbWl0ZW1wdHkiYAoJRGVzY3JpcHRpb24gc3RyaW5nICAgICAgYGpzb246ImRlc2NyaXB0aW9uLG9taXRlbXB0eSJgCglSZWYgICAgICAgICBzdHJpbmcgICAgICBganNvbjoiJHJlZixvbWl0ZW1wdHkiYAoJSXRlbXMgICAgICAgKkRlZmluaXRpb24gYGpzb246Iml0ZW1zLG9taXRlbXB0eSJgCglQcm9wZXJ0aWVzICAqRGVmaW5pdGlvbiBganNvbjoicHJvcGVydGllcyxvbWl0ZW1wdHkiYAoKCUFkZGl0aW9uYWxQcm9wZXJ0aWVzICpBZGRpdGlvbmFsUHJvcGVydGllcyBganNvbjoiYWRkaXRpb25hbFByb3BlcnRpZXMsb21pdGVtcHR5ImAKfQoKdHlwZSBBZGRpdGlvbmFsUHJvcGVydGllcyBzdHJ1Y3QgewoJVHlwZSBzdHJpbmcgYGpzb246InR5cGUiYAoJUmVmICBzdHJpbmcgYGpzb246IiRyZWYiYAp9Cgp0eXBlIE5lc3RlZFByb3BlcnR5IHN0cnVjdCB7CglJZCAgIHN0cmluZyBganNvbjoiaWQsb21pdGVtcHR5ImAKCU5hbWUgc3RyaW5nIGBqc29uOiJuYW1lLG9taXRlbXB0eSJgCn0KCnR5cGUgRGVmaW5pdGlvbiBzdHJ1Y3QgewoJVHlwZSAgICAgICAgICAgICAgICAgc3RyaW5nICAgICAgICAgICAgICAgICBganNvbjoidHlwZSxvbWl0ZW1wdHkiYAoJRm9ybWF0ICAgICAgICAgICAgICAgc3RyaW5nICAgICAgICAgICAgICAgICBganNvbjoiZm9ybWF0LG9taXRlbXB0eSJgCglJdGVtcyAgICAgICAgICAgICAgICAqRGVmaW5pdGlvbiAgICAgICAgICAgIGBqc29uOiJpdGVtcyxvbWl0ZW1wdHkiYAoJUHJvcGVydGllcyAgICAgICAgICAgbWFwW3N0cmluZ10qRGVmaW5pdGlvbiBganNvbjoicHJvcGVydGllcyxvbWl0ZW1wdHkiYAoJQWRkaXRpb25hbFByb3BlcnRpZXMgKkRlZmluaXRpb24gICAgICAgICAgICBganNvbjoiYWRkaXRpb25hbFByb3BlcnRpZXMsb21pdGVtcHR5ImAKCVJlZiAgICAgICAgICAgICAgICAgIHN0cmluZyAgICAgICAgICAgICAgICAgYGpzb246IiRyZWYsb21pdGVtcHR5ImAKfQp0eXBlIFN3YWdnZXIgc3RydWN0IHsKCVN3YWdnZXIgICAgIHN0cmluZyAgICAgICAgICAgICAgICAgYGpzb246InN3YWdnZXIiYAoJSW5mbyAgICAgICAgKkluZm8gICAgICAgICAgICAgICAgICBganNvbjoiaW5mbyJgCglIb3N0ICAgICAgICBzdHJpbmcgICAgICAgICAgICAgICAgIGBqc29uOiJob3N0ImAKCUJhc2VQYXRoICAgIHN0cmluZyAgICAgICAgICAgICAgICAgYGpzb246ImJhc2VQYXRoImAKCVNjaGVtZXMgICAgIFtdc3RyaW5nICAgICAgICAgICAgICAgYGpzb246InNjaGVtZXMiYAoJUGF0aHMgICAgICAgbWFwW3N0cmluZ11NZXRob2QgICAgICBganNvbjoicGF0aHMiYAoJRGVmaW5pdGlvbnMgbWFwW3N0cmluZ10qRGVmaW5pdGlvbiBganNvbjoiZGVmaW5pdGlvbnMiYAp9Cgp0eXBlIE1ldGhvZCBtYXBbc3RyaW5nXVJvdXRlcgoKZnVuYyBNYXBUeXBlKHR5cCBzdHJpbmcpIHN0cmluZyB7Cglzd2l0Y2ggdHlwIHsKCWNhc2UgImludCIsICJpbnQ4IiwgImludDE2IiwgImludDMyIiwgImludDY0IiwgInVpbnQiLCAidWludDgiLCAidWludDE2IiwgInVpbnQzMiIsICJ1aW50NjQiOgoJCXJldHVybiAiaW50ZWdlciIKCWNhc2UgInN0cmluZyIsICJzdHIiLCAicyI6CgkJcmV0dXJuICJzdHJpbmciCgljYXNlICJib29sIiwgImJvb2xlYW4iLCAiYiI6CgkJcmV0dXJuICJib29sZWFuIgoJY2FzZSAib2JqZWN0IiwgIm9iaiIsICJvIjoKCQlyZXR1cm4gIm9iamVjdCIKCWNhc2UgImZsb2F0MzIiLCAiZmxvYXQ2NCI6CgkJcmV0dXJuICJudW1iZXIiCgljYXNlICJhcnJheSIsICJzbGljZSI6CgkJcmV0dXJuICJhcnJheSIKCWNhc2UgIm1hcCI6CgkJcmV0dXJuICJtYXAiCgl9CglyZXR1cm4gInt9IiAvLyBhbnkKfQo="
+var templateModel = "// +build sample_swagger\n" +
+	"\n" +
+	"package sample_swagger\n" +
+	"\n" +
+	"type Info struct {\n" +
+	"	Description    string `json:\"description\"`\n" +
+	"	Version        string `json:\"version\"`\n" +
+	"	Title          string `json:\"title\"`\n" +
+	"	TermsOfService string `json:\"termsOfService\"`\n" +
+	"	Contact        struct {\n" +
+	"		Email string `json:\"email\"`\n" +
+	"	} `json:\"contact\"`\n" +
+	"	License struct {\n" +
+	"		Name string `json:\"name\"`\n" +
+	"		URL  string `json:\"url\"`\n" +
+	"	} `json:\"license\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Router struct {\n" +
+	"	Tags        []string            `json:\"tags\"`\n" +
+	"	Summary     string              `json:\"summary\"`\n" +
+	"	Description string              `json:\"description\"`\n" +
+	"	OperationID string              `json:\"operationId\"`\n" +
+	"	Consumes    []string            `json:\"consumes\"`\n" +
+	"	Produces    []string            `json:\"produces\"`\n" +
+	"	Parameters  []Parameter         `json:\"parameters\"`\n" +
+	"	Responses   map[string]Response `json:\"responses\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Schema struct {\n" +
+	"	Ref string `json:\"$ref,omitempty\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Parameter struct {\n" +
+	"	In          string  `json:\"in\"`\n" +
+	"	Name        string  `json:\"name\"`\n" +
+	"	Type        string  `json:\"type\"`\n" +
+	"	Description string  `json:\"description\"`\n" +
+	"	Required    bool    `json:\"required\"`\n" +
+	"	Schema      *Schema `json:\"schema,omitempty\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Response struct {\n" +
+	"	Description string `json:\"description\"`\n" +
+	"	Schema      struct {\n" +
+	"		Type  string `json:\"type\"`\n" +
+	"		Items struct {\n" +
+	"			Ref string `json:\"$ref\"`\n" +
+	"		} `json:\"items\"`\n" +
+	"		Ref string `json:\"$ref\"`\n" +
+	"	} `json:\"schema\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Property struct {\n" +
+	"	Type        string      `json:\"type,omitempty\"`\n" +
+	"	Format      string      `json:\"format,omitempty\"`\n" +
+	"	Description string      `json:\"description,omitempty\"`\n" +
+	"	Ref         string      `json:\"$ref,omitempty\"`\n" +
+	"	Items       *Definition `json:\"items,omitempty\"`\n" +
+	"	Properties  *Definition `json:\"properties,omitempty\"`\n" +
+	"\n" +
+	"	AdditionalProperties *AdditionalProperties `json:\"additionalProperties,omitempty\"`\n" +
+	"}\n" +
+	"\n" +
+	"type AdditionalProperties struct {\n" +
+	"	Type string `json:\"type\"`\n" +
+	"	Ref  string `json:\"$ref\"`\n" +
+	"}\n" +
+	"\n" +
+	"type NestedProperty struct {\n" +
+	"	Id   string `json:\"id,omitempty\"`\n" +
+	"	Name string `json:\"name,omitempty\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Definition struct {\n" +
+	"	Type                 string                 `json:\"type,omitempty\"`\n" +
+	"	Format               string                 `json:\"format,omitempty\"`\n" +
+	"	Items                *Definition            `json:\"items,omitempty\"`\n" +
+	"	Properties           map[string]*Definition `json:\"properties,omitempty\"`\n" +
+	"	AdditionalProperties *Definition            `json:\"additionalProperties,omitempty\"`\n" +
+	"	Ref                  string                 `json:\"$ref,omitempty\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Swagger struct {\n" +
+	"	Swagger     string                 `json:\"swagger\"`\n" +
+	"	Info        *Info                  `json:\"info\"`\n" +
+	"	Host        string                 `json:\"host\"`\n" +
+	"	BasePath    string                 `json:\"basePath\"`\n" +
+	"	Schemes     []string               `json:\"schemes\"`\n" +
+	"	Paths       map[string]Method      `json:\"paths\"`\n" +
+	"	Definitions map[string]*Definition `json:\"definitions\"`\n" +
+	"}\n" +
+	"\n" +
+	"type Method map[string]Router\n" +
+	"\n" +
+	"func MapType(typ string) string {\n" +
+	"	switch typ {\n" +
+	"	case \"int\", \"int8\", \"int16\", \"int32\", \"int64\", \"uint\", \"uint8\", \"uint16\", \"uint32\", \"uint64\":\n" +
+	"		return \"integer\"\n" +
+	"	case \"string\", \"str\", \"s\":\n" +
+	"		return \"string\"\n" +
+	"	case \"bool\", \"boolean\", \"b\":\n" +
+	"		return \"boolean\"\n" +
+	"	case \"object\", \"obj\", \"o\":\n" +
+	"		return \"object\"\n" +
+	"	case \"float32\", \"float64\":\n" +
+	"		return \"number\"\n" +
+	"	case \"array\", \"slice\":\n" +
+	"		return \"array\"\n" +
+	"	case \"map\":\n" +
+	"		return \"map\"\n" +
+	"	}\n" +
+	"	return \"{}\" // any\n" +
+	"}"
 
-var templateParseBase64 = "Ly8gK2J1aWxkIHNhbXBsZV9zd2FnZ2VyCgpwYWNrYWdlIHNhbXBsZV9zd2FnZ2VyCgppbXBvcnQgKAoJImVuY29kaW5nL2pzb24iCgkiZm10IgoJInJlZmxlY3QiCgkic3RyaW5ncyIKKQoKY29uc3QgKAoJdHlwZVN0cmluZyA9ICJzdHJpbmciCgl0eXBlSW50ICAgID0gImludGVnZXIiCgl0eXBlQm9vbCAgID0gImJvb2xlYW4iCgl0eXBlTnVtYmVyID0gIm51bWJlciIKCXR5cGVPYmplY3QgPSAib2JqZWN0IgoJdHlwZUFycmF5ICA9ICJhcnJheSIKCXR5cGVNYXAgICAgPSAibWFwIgopCgp2YXIgYnVpbGRJblR5cGVzID0gbWFwW3N0cmluZ11zdHJpbmd7CgkidGltZS5UaW1lIjogICJzdHJpbmciLAoJIip0aW1lLlRpbWUiOiAic3RyaW5nIiwKfQoKdmFyIGRlZmluaXRpb25zID0gbWFrZShtYXBbc3RyaW5nXW1vZGVsKQoKZnVuYyBwYXJzZSgpIHN0cmluZyB7Cgl2YXIgc3dhZ2dlciBTd2FnZ2VyCgllcnIgOj0ganNvbi5Vbm1hcnNoYWwoW11ieXRlKGdlbmVyYXRvckpzb24pLCAmc3dhZ2dlcikKCWlmIGVyciAhPSBuaWwgewoJCWZtdC5QcmludGYoInVubWFyc2hhbCBlcnJvcjogJXNcbiIsIGVyci5FcnJvcigpKQoJCXJldHVybiAiIgoJfQoKCWZvciBfLCB2IDo9IHJhbmdlIGdlbmVyYXRvck1vZGVscyB7CgkJcnQgOj0gcmVmbGVjdC5UeXBlT2YodikKCQlydiA6PSByZWZsZWN0LlZhbHVlT2YodikKCQlwYXJzZURlZmluZXMoJnJ2LCBydCkKCX0KCglmb3IgXywgdiA6PSByYW5nZSBkZWZpbml0aW9ucyB7CgkJaWYgc3dhZ2dlci5EZWZpbml0aW9ucyA9PSBuaWwgewoJCQlzd2FnZ2VyLkRlZmluaXRpb25zID0gbWFrZShtYXBbc3RyaW5nXSpEZWZpbml0aW9uKQoJCX0KCQluYW1lLCBkZWZpbml0aW9uIDo9IHYudG9EZWZpbml0aW9uKGZhbHNlKQoJCWlmIGRlZmluaXRpb24gIT0gbmlsICYmIG5hbWUgIT0gIiIgewoJCQlzd2FnZ2VyLkRlZmluaXRpb25zW25hbWVdID0gZGVmaW5pdGlvbgoJCX0KCX0KCWlmIHN3YWdnZXIuU3dhZ2dlciA9PSAiIiB7CgkJc3dhZ2dlci5Td2FnZ2VyID0gIjIuMCIKCX0KCWJzLCBlcnIgOj0ganNvbi5NYXJzaGFsKHN3YWdnZXIpCglpZiBlcnIgIT0gbmlsIHsKCQlmbXQuUHJpbnRmKCJtYXJzaGFsIGVycm9yOiAlc1xuIiwgZXJyLkVycm9yKCkpCgkJcmV0dXJuICIiCgl9CglyZXR1cm4gc3RyaW5nKGJzKQp9Cgp0eXBlIG1vZGVsIHN0cnVjdCB7CglOYW1lICAgc3RyaW5nCglUeXBlICAgc3RyaW5nCglPYmplY3QgKm1vZGVsICAgYGpzb246Im9iamVjdCJgCglGaWVsZHMgW10qbW9kZWwgYGpzb246IixvbWl0ZW1wdHkiYCAvLyBwcm9wZXJ0aWVzCgoJQW5vbnltb3VzIGJvb2wKfQoKZnVuYyAobSAqbW9kZWwpIGV4cGFuZEZpZWxkcygpIFtdKm1vZGVsIHsKCXZhciBmZHMgW10qbW9kZWwKCWZvciBfLCBmIDo9IHJhbmdlIG0uRmllbGRzIHsKCQlpZiBmLkFub255bW91cyAmJiBmLk9iamVjdCAhPSBuaWwgewoJCQlwbSwgb2sgOj0gZGVmaW5pdGlvbnNbZi5PYmplY3QuTmFtZV0KCQkJaWYgb2sgewoJCQkJZmRzID0gYXBwZW5kKGZkcywgcG0uZXhwYW5kRmllbGRzKCkuLi4pCgkJCX0KCQl9IGVsc2UgewoJCQlmZHMgPSBhcHBlbmQoZmRzLCBmKQoJCX0KCX0KCXJldHVybiBmZHMKfQoKZnVuYyAobSAqbW9kZWwpIHRvRGVmaW5pdGlvbihyZWYgYm9vbCkgKG5hbWUgc3RyaW5nLCBkZWZpbml0aW9uICpEZWZpbml0aW9uKSB7CgoJaWYgbSA9PSBuaWwgewoJCXJldHVybgoJfQoJaWYgIXJlZiAmJiBpc0Jhc2VEZWZpbml0aW9ucyhtLlR5cGUpIHsKCQlyZXR1cm4gbS5UeXBlLCBuaWwKCX0KCgl2YXIgZCBEZWZpbml0aW9uCgluYW1lID0gbS5OYW1lCglkLlR5cGUgPSBtLlR5cGUKCglzd2l0Y2ggbS5UeXBlIHsKCWNhc2UgdHlwZU9iamVjdDoKCQlpZiByZWYgewoJCQlpZiBtLk9iamVjdCAhPSBuaWwgewoJCQkJaWYgaXNCYXNlRGVmaW5pdGlvbnMobS5PYmplY3QuVHlwZSkgewoJCQkJCXJldHVybiBtLk5hbWUsICZEZWZpbml0aW9ue1R5cGU6IG0uT2JqZWN0LlR5cGV9CgkJCQl9CgkJCQlpZiAhaXNOZXN0ZWRPYmplY3QobS5PYmplY3QuTmFtZSkgewoJCQkJCXJldHVybiBtLk5hbWUsICZEZWZpbml0aW9ue1R5cGU6IHR5cGVPYmplY3QsIFJlZjogIiMvZGVmaW5pdGlvbnMvIiArIG0uT2JqZWN0Lk5hbWV9CgkJCQl9CgkJCX0gZWxzZSB7CgkJCQlpZiBpc0Jhc2VEZWZpbml0aW9ucyhtLlR5cGUpIHsKCQkJCQlyZXR1cm4gbS5OYW1lLCAmRGVmaW5pdGlvbntUeXBlOiBtLlR5cGV9CgkJCQl9CgkJCQlpZiAhaXNOZXN0ZWRPYmplY3QobS5OYW1lKSB7CgkJCQkJcmV0dXJuIG0uTmFtZSwgJkRlZmluaXRpb257VHlwZTogdHlwZU9iamVjdCwgUmVmOiAiIy9kZWZpbml0aW9ucy8iICsgbS5OYW1lfQoJCQkJfQoJCQl9CgkJfQoJCWlmICFyZWYgJiYgaXNOZXN0ZWRPYmplY3QobmFtZSkgewoJCQlyZXR1cm4gbS5OYW1lLCBuaWwKCQl9CgoJCWlmIG0uT2JqZWN0ICE9IG5pbCB7CgkJCV8sIGQgOj0gbS5PYmplY3QudG9EZWZpbml0aW9uKHRydWUpCgkJCXJldHVybiBtLk5hbWUsIGQKCQl9IGVsc2UgewoJCQlpZiBsZW4obS5GaWVsZHMpID4gMCB7CgkJCQlwcyA6PSBtYWtlKG1hcFtzdHJpbmddKkRlZmluaXRpb24sIGxlbihtLkZpZWxkcykpCgkJCQlmZHMgOj0gbS5leHBhbmRGaWVsZHMoKQoJCQkJZm9yIF8sIHYgOj0gcmFuZ2UgZmRzIHsKCQkJCQlfLCBwc1t2Lk5hbWVdID0gdi50b0RlZmluaXRpb24odHJ1ZSkKCQkJCX0KCQkJCWQuUHJvcGVydGllcyA9IHBzCgkJCX0KCQl9CgljYXNlIHR5cGVBcnJheToKCQlpZiBtLk9iamVjdCAhPSBuaWwgewoJCQlfLCBkIDo9IG0uT2JqZWN0LnRvRGVmaW5pdGlvbih0cnVlKQoJCQlyZXR1cm4gbS5OYW1lLCAmRGVmaW5pdGlvbntUeXBlOiB0eXBlQXJyYXksIEl0ZW1zOiBkfQoJCX0KCWNhc2UgdHlwZU1hcDoKCQlpZiBtLk9iamVjdCAhPSBuaWwgewoJCQlfLCBkIDo9IG0uT2JqZWN0LnRvRGVmaW5pdGlvbih0cnVlKQoJCQlyZXR1cm4gbS5OYW1lLCAmRGVmaW5pdGlvbntUeXBlOiB0eXBlT2JqZWN0LCBBZGRpdGlvbmFsUHJvcGVydGllczogZH0KCQl9Cgl9CglkZWZpbml0aW9uID0gJmQKCXJldHVybgp9CgpmdW5jIGlzQmFzZURlZmluaXRpb25zKHR5cCBzdHJpbmcpIGJvb2wgewoJc3dpdGNoIHR5cCB7CgljYXNlIHR5cGVPYmplY3QsIHR5cGVBcnJheSwgdHlwZU1hcDoKCQlyZXR1cm4gZmFsc2UKCX0KCXJldHVybiB0cnVlCn0KCmZ1bmMgaXNOZXN0ZWRPYmplY3QobmFtZSBzdHJpbmcpIGJvb2wgewoJcmV0dXJuIHN0cmluZ3MuQ29udGFpbnMobmFtZSwgInN0cnVjdCB7IikKfQoKZnVuYyBwYXJzZUZpZWxkKHZhbHVlIHJlZmxlY3QuVmFsdWUsIHR5cCByZWZsZWN0LlR5cGUsIGZkIHJlZmxlY3QuU3RydWN0RmllbGQpICptb2RlbCB7CgkvLyB1bmV4cG9ydCBmaWVsZAoJaWYgZmQuTmFtZVswXSA+ICdaJyB8fCBmZC5OYW1lWzBdIDwgJ0EnIHsKCQlyZXR1cm4gbmlsCgl9Cgl2YXIgZiBtb2RlbAoJZi5OYW1lID0gc3RyaW5ncy5TcGxpdChmZC5UYWcuR2V0KCJqc29uIiksICIsIilbMF0KCS8vIGlnbm9yZSBmaWVsZAoJaWYgZi5OYW1lID09ICItIiB7CgkJcmV0dXJuIG5pbAoJfQoJZi5Bbm9ueW1vdXMgPSBmZC5Bbm9ueW1vdXMKCWlmIGYuTmFtZSA9PSAiIiB7CgkJZi5OYW1lID0gZmQuTmFtZQoJfQoJc3dpdGNoIHR5cC5LaW5kKCkgewoJY2FzZSByZWZsZWN0LlN0cmluZzoKCQlmLlR5cGUgPSB0eXBlU3RyaW5nCgljYXNlIHJlZmxlY3QuSW50LCByZWZsZWN0LkludDgsIHJlZmxlY3QuSW50MTYsIHJlZmxlY3QuSW50MzIsIHJlZmxlY3QuSW50NjQsCgkJcmVmbGVjdC5VaW50LCByZWZsZWN0LlVpbnQ4LCByZWZsZWN0LlVpbnQxNiwgcmVmbGVjdC5VaW50MzIsIHJlZmxlY3QuVWludDY0OgoJCWYuVHlwZSA9IHR5cGVJbnQKCWNhc2UgcmVmbGVjdC5GbG9hdDMyLCByZWZsZWN0LkZsb2F0NjQ6CgkJZi5UeXBlID0gdHlwZU51bWJlcgoJY2FzZSByZWZsZWN0LkJvb2w6CgkJZi5UeXBlID0gdHlwZUJvb2wKCWNhc2UgcmVmbGVjdC5TdHJ1Y3Q6CgkJaWYgYnVpbGRJbiwgb2sgOj0gYnVpbGRJblR5cGVzW3R5cC5TdHJpbmcoKV07IG9rIHsKCQkJZi5UeXBlID0gYnVpbGRJbgoJCQlicmVhawoJCX0KCQlmLlR5cGUgPSB0eXBlT2JqZWN0CgkJbSA6PSBwYXJzZURlZmluZXMoJnZhbHVlLCB0eXApCgkJZi5PYmplY3QgPSAmbQoJY2FzZSByZWZsZWN0LlB0cjoKCQl2LCB0IDo9IGluZGlyZWN0VHlwZShmZC5UeXBlKQoJCXJldHVybiBwYXJzZUZpZWxkKHYsIHQsIGZkKQoJY2FzZSByZWZsZWN0LkFycmF5LCByZWZsZWN0LlNsaWNlOgoJCWYuVHlwZSA9IHR5cGVBcnJheQoJCXYsIHQgOj0gaW5kaXJlY3RUeXBlKGZkLlR5cGUuRWxlbSgpKQoJCW0gOj0gcGFyc2VEZWZpbmVzKCZ2LCB0KQoJCWYuT2JqZWN0ID0gJm0KCWNhc2UgcmVmbGVjdC5NYXA6CgkJZi5UeXBlID0gdHlwZU1hcAoJCXYsIHQgOj0gaW5kaXJlY3RUeXBlKGZkLlR5cGUuRWxlbSgpKQoJCXZtIDo9IHBhcnNlRGVmaW5lcygmdiwgdCkKCQlmLk9iamVjdCA9ICZ2bQoJfQoJcmV0dXJuICZmCn0KCmZ1bmMgbmFtZU9mVHlwZSh0IHJlZmxlY3QuVHlwZSkgc3RyaW5nIHsKCXJldHVybiB0LlN0cmluZygpCn0KCmZ1bmMgaW5kaXJlY3RUeXBlKHQgcmVmbGVjdC5UeXBlKSAocmVmbGVjdC5WYWx1ZSwgcmVmbGVjdC5UeXBlKSB7Cglzd2l0Y2ggdC5LaW5kKCkgewoJY2FzZSByZWZsZWN0LlB0cjoKCQlyZXR1cm4gcmVmbGVjdC5JbmRpcmVjdChyZWZsZWN0Lk5ldyh0LkVsZW0oKSkpLCB0LkVsZW0oKQoJfQoJcmV0dXJuIHJlZmxlY3QuSW5kaXJlY3QocmVmbGVjdC5OZXcodCkpLCB0Cn0KCmZ1bmMgcGFyc2VEZWZpbmVzKHYgKnJlZmxlY3QuVmFsdWUsIHQgcmVmbGVjdC5UeXBlKSBtb2RlbCB7CglpZiB2ID09IG5pbCB7CgkJcmV0dXJuIG1vZGVse30KCX0KCglzd2l0Y2ggdC5LaW5kKCkgewoJY2FzZSByZWZsZWN0LlB0cjoKCQlpZiB2LklzTmlsKCkgewoJCQl2LCB0IDo9IGluZGlyZWN0VHlwZSh0KQoJCQlyZXR1cm4gcGFyc2VEZWZpbmVzKCZ2LCB0KQoJCX0KCX0KCglpZiB0LktpbmQoKSA9PSByZWZsZWN0LlB0ciB7CgkJb2JqIDo9IHJlZmxlY3QuSW5kaXJlY3QoKnYpLkludGVyZmFjZSgpCgkJdiA6PSByZWZsZWN0LlZhbHVlT2Yob2JqKQoJCXQgOj0gcmVmbGVjdC5UeXBlT2Yob2JqKQoJCXJldHVybiBwYXJzZURlZmluZXMoJnYsIHQpCgl9CgoJa2V5IDo9IG5hbWVPZlR5cGUodCkKCWlmIHYsIG9rIDo9IGRlZmluaXRpb25zW2tleV07IG9rIHsKCQlpZiB2LlR5cGUgPT0gdHlwZU9iamVjdCAmJiAhc3RyaW5ncy5Db250YWlucyh2Lk5hbWUsICJzdHJ1Y3QgeyAiKSB7CgkJCXJldHVybiBtb2RlbHtOYW1lOiB2Lk5hbWUsIFR5cGU6IHYuVHlwZX0KCQl9CgkJcmV0dXJuIHYKCX0KCS8vIGJsb2NrIGRlYWQgbG9vcAoJZGVmaW5pdGlvbnNba2V5XSA9IHNhbXBsZU1vZGVsKGtleSwgdCkKCgl2YXIgbSBtb2RlbAoJc3dpdGNoIHQuS2luZCgpIHsKCWNhc2UgcmVmbGVjdC5TdHJpbmc6CgkJbS5OYW1lID0gdHlwZVN0cmluZwoJCW0uVHlwZSA9IHR5cGVTdHJpbmcKCQlyZXR1cm4gbQoJY2FzZSByZWZsZWN0LkludCwgcmVmbGVjdC5JbnQ4LCByZWZsZWN0LkludDE2LCByZWZsZWN0LkludDMyLCByZWZsZWN0LkludDY0LAoJCXJlZmxlY3QuVWludCwgcmVmbGVjdC5VaW50OCwgcmVmbGVjdC5VaW50MTYsIHJlZmxlY3QuVWludDMyLCByZWZsZWN0LlVpbnQ2NDoKCQltLk5hbWUgPSB0eXBlSW50CgkJbS5UeXBlID0gdHlwZUludAoJCXJldHVybiBtCgljYXNlIHJlZmxlY3QuRmxvYXQzMiwgcmVmbGVjdC5GbG9hdDY0OgoJCW0uTmFtZSA9IHR5cGVOdW1iZXIKCQltLlR5cGUgPSB0eXBlTnVtYmVyCgljYXNlIHJlZmxlY3QuQm9vbDoKCQltLk5hbWUgPSB0eXBlQm9vbAoJCW0uVHlwZSA9IHR5cGVCb29sCgljYXNlIHJlZmxlY3QuU3RydWN0OgoJCW0uTmFtZSA9IGtleQoJCW0uVHlwZSA9IHR5cGVPYmplY3QKCQl2YXIgZmllbGRzIFtdKm1vZGVsCgkJZm9yIGkgOj0gMDsgaSA8IHYuTnVtRmllbGQoKTsgaSsrIHsKCQkJdiA6PSB2LkZpZWxkKGkpCgkJCWYgOj0gcGFyc2VGaWVsZCh2LCB0LkZpZWxkKGkpLlR5cGUsIHQuRmllbGQoaSkpCgkJCWlmIGYgPT0gbmlsIHsKCQkJCWNvbnRpbnVlCgkJCX0KCQkJZmllbGRzID0gYXBwZW5kKGZpZWxkcywgZikKCQl9CgkJbS5GaWVsZHMgPSBmaWVsZHMKCWNhc2UgcmVmbGVjdC5BcnJheSwgcmVmbGVjdC5TbGljZToKCQltLlR5cGUgPSB0eXBlQXJyYXkKCQlmbXQuUHJpbnRsbigibmFtZS0+IiwgdC5FbGVtKCkuTmFtZSgpKQoJCXYsIHQgOj0gaW5kaXJlY3RUeXBlKHQuRWxlbSgpKQoJCW1tIDo9IHBhcnNlRGVmaW5lcygmdiwgdCkKCQltLk9iamVjdCA9ICZtbQoJY2FzZSByZWZsZWN0Lk1hcDoKCQltLlR5cGUgPSB0eXBlTWFwCgkJdiwgdCA6PSBpbmRpcmVjdFR5cGUodC5FbGVtKCkpCgkJZm10LlByaW50bG4oInR5cDoiLCB0KQoJCW1tIDo9IHBhcnNlRGVmaW5lcygmdiwgdCkKCQltLk9iamVjdCA9ICZtbQoJfQoJZGVmaW5pdGlvbnNba2V5XSA9IG0KCWlmIG0uVHlwZSA9PSB0eXBlT2JqZWN0ICYmICFpc05lc3RlZE9iamVjdChtLk5hbWUpIHsKCQlyZXR1cm4gbW9kZWx7TmFtZTogbS5OYW1lLCBUeXBlOiBtLlR5cGV9Cgl9CglyZXR1cm4gbQp9CgpmdW5jIHNhbXBsZU1vZGVsKGtleSBzdHJpbmcsIHQgcmVmbGVjdC5UeXBlKSBtb2RlbCB7Cglzd2l0Y2ggdC5LaW5kKCkgewoJY2FzZSByZWZsZWN0LlN0cmluZzoKCQlyZXR1cm4gbW9kZWx7TmFtZToga2V5LCBUeXBlOiB0eXBlU3RyaW5nfQoJY2FzZSByZWZsZWN0LkludCwgcmVmbGVjdC5JbnQ4LCByZWZsZWN0LkludDE2LCByZWZsZWN0LkludDMyLCByZWZsZWN0LkludDY0LAoJCXJlZmxlY3QuVWludCwgcmVmbGVjdC5VaW50OCwgcmVmbGVjdC5VaW50MTYsIHJlZmxlY3QuVWludDMyLCByZWZsZWN0LlVpbnQ2NDoKCQlyZXR1cm4gbW9kZWx7TmFtZToga2V5LCBUeXBlOiB0eXBlSW50fQoJY2FzZSByZWZsZWN0LkZsb2F0MzIsIHJlZmxlY3QuRmxvYXQ2NDoKCQlyZXR1cm4gbW9kZWx7TmFtZToga2V5LCBUeXBlOiB0eXBlTnVtYmVyfQoJY2FzZSByZWZsZWN0LkJvb2w6CgkJcmV0dXJuIG1vZGVse05hbWU6IGtleSwgVHlwZTogdHlwZUJvb2x9CglkZWZhdWx0OgoJCXJldHVybiBtb2RlbHtOYW1lOiBrZXksIFR5cGU6IHR5cGVPYmplY3R9Cgl9CglyZXR1cm4gbW9kZWx7fQp9Cg=="
+var templateParser = "// +build sample_swagger\n" +
+	"\n" +
+	"package sample_swagger\n" +
+	"\n" +
+	"import (\n" +
+	"	\"encoding/json\"\n" +
+	"	\"fmt\"\n" +
+	"	\"reflect\"\n" +
+	"	\"strings\"\n" +
+	")\n" +
+	"\n" +
+	"const (\n" +
+	"	typeString = \"string\"\n" +
+	"	typeInt    = \"integer\"\n" +
+	"	typeBool   = \"boolean\"\n" +
+	"	typeNumber = \"number\"\n" +
+	"	typeObject = \"object\"\n" +
+	"	typeArray  = \"array\"\n" +
+	"	typeMap    = \"map\"\n" +
+	")\n" +
+	"\n" +
+	"var buildInTypes = map[string]string{\n" +
+	"	\"time.Time\":  \"string\",\n" +
+	"	\"*time.Time\": \"string\",\n" +
+	"}\n" +
+	"\n" +
+	"var definitions = make(map[string]model)\n" +
+	"\n" +
+	"func parse() string {\n" +
+	"	var swagger Swagger\n" +
+	"	err := json.Unmarshal([]byte(generatorJson), &swagger)\n" +
+	"	if err != nil {\n" +
+	"		fmt.Printf(\"unmarshal error: %s\", err.Error())\n" +
+	"		return \"\"\n" +
+	"	}\n" +
+	"\n" +
+	"	for _, v := range generatorModels {\n" +
+	"		rt := reflect.TypeOf(v)\n" +
+	"		rv := reflect.ValueOf(v)\n" +
+	"		parseDefines(&rv, rt)\n" +
+	"	}\n" +
+	"\n" +
+	"	for _, v := range definitions {\n" +
+	"		if swagger.Definitions == nil {\n" +
+	"			swagger.Definitions = make(map[string]*Definition)\n" +
+	"		}\n" +
+	"		name, definition := v.toDefinition(false)\n" +
+	"		if definition != nil && name != \"\" {\n" +
+	"			swagger.Definitions[name] = definition\n" +
+	"		}\n" +
+	"	}\n" +
+	"	if swagger.Swagger == \"\" {\n" +
+	"		swagger.Swagger = \"2.0\"\n" +
+	"	}\n" +
+	"	bs, err := json.Marshal(swagger)\n" +
+	"	if err != nil {\n" +
+	"		fmt.Printf(\"marshal error: %s\", err.Error())\n" +
+	"		return \"\"\n" +
+	"	}\n" +
+	"	return string(bs)\n" +
+	"}\n" +
+	"\n" +
+	"type model struct {\n" +
+	"	Name   string\n" +
+	"	Type   string\n" +
+	"	Object *model   `json:\"object\"`\n" +
+	"	Fields []*model `json:\",omitempty\"` // properties\n" +
+	"\n" +
+	"	Anonymous bool\n" +
+	"}\n" +
+	"\n" +
+	"func (m *model) expandFields() []*model {\n" +
+	"	var fds []*model\n" +
+	"	for _, f := range m.Fields {\n" +
+	"		if f.Anonymous && f.Object != nil {\n" +
+	"			pm, ok := definitions[f.Object.Name]\n" +
+	"			if ok {\n" +
+	"				fds = append(fds, pm.expandFields()...)\n" +
+	"			}\n" +
+	"		} else {\n" +
+	"			fds = append(fds, f)\n" +
+	"		}\n" +
+	"	}\n" +
+	"	return fds\n" +
+	"}\n" +
+	"\n" +
+	"func (m *model) toDefinition(ref bool) (name string, definition *Definition) {\n" +
+	"\n" +
+	"	if m == nil {\n" +
+	"		return\n" +
+	"	}\n" +
+	"	if !ref && isBaseDefinitions(m.Type) {\n" +
+	"		return m.Type, nil\n" +
+	"	}\n" +
+	"\n" +
+	"	var d Definition\n" +
+	"	name = m.Name\n" +
+	"	d.Type = m.Type\n" +
+	"\n" +
+	"	switch m.Type {\n" +
+	"	case typeObject:\n" +
+	"		if ref {\n" +
+	"			if m.Object != nil {\n" +
+	"				if isBaseDefinitions(m.Object.Type) {\n" +
+	"					return m.Name, &Definition{Type: m.Object.Type}\n" +
+	"				}\n" +
+	"				if !isNestedObject(m.Object.Name) {\n" +
+	"					return m.Name, &Definition{Type: typeObject, Ref: \"#/definitions/\" + m.Object.Name}\n" +
+	"				}\n" +
+	"			} else {\n" +
+	"				if isBaseDefinitions(m.Type) {\n" +
+	"					return m.Name, &Definition{Type: m.Type}\n" +
+	"				}\n" +
+	"				if !isNestedObject(m.Name) {\n" +
+	"					return m.Name, &Definition{Type: typeObject, Ref: \"#/definitions/\" + m.Name}\n" +
+	"				}\n" +
+	"			}\n" +
+	"		}\n" +
+	"		if !ref && isNestedObject(name) {\n" +
+	"			return m.Name, nil\n" +
+	"		}\n" +
+	"\n" +
+	"		if m.Object != nil {\n" +
+	"			_, d := m.Object.toDefinition(true)\n" +
+	"			return m.Name, d\n" +
+	"		} else {\n" +
+	"			if len(m.Fields) > 0 {\n" +
+	"				ps := make(map[string]*Definition, len(m.Fields))\n" +
+	"				fds := m.expandFields()\n" +
+	"				for _, v := range fds {\n" +
+	"					_, ps[v.Name] = v.toDefinition(true)\n" +
+	"				}\n" +
+	"				d.Properties = ps\n" +
+	"			}\n" +
+	"		}\n" +
+	"	case typeArray:\n" +
+	"		if m.Object != nil {\n" +
+	"			_, d := m.Object.toDefinition(true)\n" +
+	"			return m.Name, &Definition{Type: typeArray, Items: d}\n" +
+	"		}\n" +
+	"	case typeMap:\n" +
+	"		if m.Object != nil {\n" +
+	"			_, d := m.Object.toDefinition(true)\n" +
+	"			return m.Name, &Definition{Type: typeObject, AdditionalProperties: d}\n" +
+	"		}\n" +
+	"	}\n" +
+	"	definition = &d\n" +
+	"	return\n" +
+	"}\n" +
+	"\n" +
+	"func isBaseDefinitions(typ string) bool {\n" +
+	"	switch typ {\n" +
+	"	case typeObject, typeArray, typeMap:\n" +
+	"		return false\n" +
+	"	}\n" +
+	"	return true\n" +
+	"}\n" +
+	"\n" +
+	"func isNestedObject(name string) bool {\n" +
+	"	return strings.Contains(name, \"struct {\")\n" +
+	"}\n" +
+	"\n" +
+	"func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *model {\n" +
+	"	// unexport field\n" +
+	"	if fd.Name[0] > 'Z' || fd.Name[0] < 'A' {\n" +
+	"		return nil\n" +
+	"	}\n" +
+	"	var f model\n" +
+	"	f.Name = strings.Split(fd.Tag.Get(\"json\"), \",\")[0]\n" +
+	"	// ignore field\n" +
+	"	if f.Name == \"-\" {\n" +
+	"		return nil\n" +
+	"	}\n" +
+	"	f.Anonymous = fd.Anonymous\n" +
+	"	if f.Name == \"\" {\n" +
+	"		f.Name = fd.Name\n" +
+	"	}\n" +
+	"	switch typ.Kind() {\n" +
+	"	case reflect.String:\n" +
+	"		f.Type = typeString\n" +
+	"	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,\n" +
+	"		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:\n" +
+	"		f.Type = typeInt\n" +
+	"	case reflect.Float32, reflect.Float64:\n" +
+	"		f.Type = typeNumber\n" +
+	"	case reflect.Bool:\n" +
+	"		f.Type = typeBool\n" +
+	"	case reflect.Struct:\n" +
+	"		if buildIn, ok := buildInTypes[typ.String()]; ok {\n" +
+	"			f.Type = buildIn\n" +
+	"			break\n" +
+	"		}\n" +
+	"		f.Type = typeObject\n" +
+	"		m := parseDefines(&value, typ)\n" +
+	"		f.Object = &m\n" +
+	"	case reflect.Ptr:\n" +
+	"		v, t := indirectType(fd.Type)\n" +
+	"		return parseField(v, t, fd)\n" +
+	"	case reflect.Array, reflect.Slice:\n" +
+	"		f.Type = typeArray\n" +
+	"		v, t := indirectType(fd.Type.Elem())\n" +
+	"		m := parseDefines(&v, t)\n" +
+	"		f.Object = &m\n" +
+	"	case reflect.Map:\n" +
+	"		f.Type = typeMap\n" +
+	"		v, t := indirectType(fd.Type.Elem())\n" +
+	"		vm := parseDefines(&v, t)\n" +
+	"		f.Object = &vm\n" +
+	"	}\n" +
+	"	return &f\n" +
+	"}\n" +
+	"\n" +
+	"func nameOfType(t reflect.Type) string {\n" +
+	"	return t.String()\n" +
+	"}\n" +
+	"\n" +
+	"func indirectType(t reflect.Type) (reflect.Value, reflect.Type) {\n" +
+	"	switch t.Kind() {\n" +
+	"	case reflect.Ptr:\n" +
+	"		return reflect.Indirect(reflect.New(t.Elem())), t.Elem()\n" +
+	"	}\n" +
+	"	return reflect.Indirect(reflect.New(t)), t\n" +
+	"}\n" +
+	"\n" +
+	"func parseDefines(v *reflect.Value, t reflect.Type) model {\n" +
+	"	if v == nil {\n" +
+	"		return model{}\n" +
+	"	}\n" +
+	"\n" +
+	"	switch t.Kind() {\n" +
+	"	case reflect.Ptr:\n" +
+	"		if v.IsNil() {\n" +
+	"			v, t := indirectType(t)\n" +
+	"			return parseDefines(&v, t)\n" +
+	"		}\n" +
+	"	}\n" +
+	"\n" +
+	"	if t.Kind() == reflect.Ptr {\n" +
+	"		obj := reflect.Indirect(*v).Interface()\n" +
+	"		v := reflect.ValueOf(obj)\n" +
+	"		t := reflect.TypeOf(obj)\n" +
+	"		return parseDefines(&v, t)\n" +
+	"	}\n" +
+	"\n" +
+	"	key := nameOfType(t)\n" +
+	"	if v, ok := definitions[key]; ok {\n" +
+	"		if v.Type == typeObject && !strings.Contains(v.Name, \"struct { \") {\n" +
+	"			return model{Name: v.Name, Type: v.Type}\n" +
+	"		}\n" +
+	"		return v\n" +
+	"	}\n" +
+	"	// block dead loop\n" +
+	"	definitions[key] = sampleModel(key, t)\n" +
+	"\n" +
+	"	var m model\n" +
+	"	switch t.Kind() {\n" +
+	"	case reflect.String:\n" +
+	"		m.Name = typeString\n" +
+	"		m.Type = typeString\n" +
+	"		return m\n" +
+	"	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,\n" +
+	"		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:\n" +
+	"		m.Name = typeInt\n" +
+	"		m.Type = typeInt\n" +
+	"		return m\n" +
+	"	case reflect.Float32, reflect.Float64:\n" +
+	"		m.Name = typeNumber\n" +
+	"		m.Type = typeNumber\n" +
+	"	case reflect.Bool:\n" +
+	"		m.Name = typeBool\n" +
+	"		m.Type = typeBool\n" +
+	"	case reflect.Struct:\n" +
+	"		m.Name = key\n" +
+	"		m.Type = typeObject\n" +
+	"		var fields []*model\n" +
+	"		for i := 0; i < v.NumField(); i++ {\n" +
+	"			v := v.Field(i)\n" +
+	"			f := parseField(v, t.Field(i).Type, t.Field(i))\n" +
+	"			if f == nil {\n" +
+	"				continue\n" +
+	"			}\n" +
+	"			fields = append(fields, f)\n" +
+	"		}\n" +
+	"		m.Fields = fields\n" +
+	"	case reflect.Array, reflect.Slice:\n" +
+	"		m.Type = typeArray\n" +
+	"		fmt.Println(\"name->\", t.Elem().Name())\n" +
+	"		v, t := indirectType(t.Elem())\n" +
+	"		mm := parseDefines(&v, t)\n" +
+	"		m.Object = &mm\n" +
+	"	case reflect.Map:\n" +
+	"		m.Type = typeMap\n" +
+	"		v, t := indirectType(t.Elem())\n" +
+	"		fmt.Println(\"typ:\", t)\n" +
+	"		mm := parseDefines(&v, t)\n" +
+	"		m.Object = &mm\n" +
+	"	}\n" +
+	"	definitions[key] = m\n" +
+	"	if m.Type == typeObject && !isNestedObject(m.Name) {\n" +
+	"		return model{Name: m.Name, Type: m.Type}\n" +
+	"	}\n" +
+	"	return m\n" +
+	"}\n" +
+	"\n" +
+	"func sampleModel(key string, t reflect.Type) model {\n" +
+	"	switch t.Kind() {\n" +
+	"	case reflect.String:\n" +
+	"		return model{Name: key, Type: typeString}\n" +
+	"	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,\n" +
+	"		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:\n" +
+	"		return model{Name: key, Type: typeInt}\n" +
+	"	case reflect.Float32, reflect.Float64:\n" +
+	"		return model{Name: key, Type: typeNumber}\n" +
+	"	case reflect.Bool:\n" +
+	"		return model{Name: key, Type: typeBool}\n" +
+	"	default:\n" +
+	"		return model{Name: key, Type: typeObject}\n" +
+	"	}\n" +
+	"	return model{}\n" +
+	"}\n" +
+	""
 
-var templateServerBase64 = "Ly8gK2J1aWxkIHNhbXBsZV9zd2FnZ2VyCgpwYWNrYWdlIHNhbXBsZV9zd2FnZ2VyCgppbXBvcnQgKAoJImh0bWwvdGVtcGxhdGUiCgkibmV0L2h0dHAiCikKCnZhciBzZXJ2ZXJKc29uIHN0cmluZwoKdmFyIGh0bWxUZW1wID0gYAo8IS0tIEhUTUwgZm9yIHN0YXRpYyBkaXN0cmlidXRpb24gYnVuZGxlIGJ1aWxkIC0tPgo8IURPQ1RZUEUgaHRtbD4KPGh0bWwgbGFuZz0iZW4iPgo8aGVhZD4KICAgIDxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KICAgIDx0aXRsZT5Td2FnZ2VyIFVJPC90aXRsZT4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgdHlwZT0idGV4dC9jc3MiCiAgICAgICAgICBocmVmPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9zd2FnZ2VyLXVpLzMuMTguMi9zd2FnZ2VyLXVpLmNzcyI+CiAgICA8bGluayByZWw9Imljb24iIHR5cGU9ImltYWdlL3BuZyIgaHJlZj0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFDQUFBQUFnQ0FZQUFBQnplbnIwQUFBRVBFbEVRVlI0QWIxWEE4eGxXUXgrYTl1MmJjUmV4MTdidGoxRzhOdTJiZHUyYmZPaTAyL3l6ak4vTldudVlkdGJINDJqb0tycXFiS3krYVNzU0QveU4wS1MxNnQ0UEFLVTVJMGEva1poRDJkd1ZyTlRvS2p5aFV6NGUwV1Irb2hVY2dSd2xnWDVrZTllYkkrK25UK1czbVlpVTRJd3I5SHdkQU9WdEhwU1l1WFBGRjcwSVpESFAxRnhxd2Z2MVJQT0NNQmRwdkV1YURuSlhMbVkveUJPRUZ2ZlhLYThwdVAwYjhUZDlKbW54aWIrRTNFWDVUWWU0enRMT3FGWmlBVFFkSlQ1MVh5aFFWeXU2Z3FoWDRLdkFYR244SmVncTZteU13ZzBoRm1hbVBhMWR2OWNNR2ZIb3BEOHQwRnNXeGljL3lheHd4b0lvVjVzeStaeGdybEh4aXNnc0NQb252YWlvUkFKRm4wQ0RnZDFBVVB5MzhMRkhjV2d2RGRJMElkam1xcitRdmJZQ1dLbzZnbzJ1dmkxenpsVTBSRkFxK3R6TkRSVmE1ZlI0RlFOclc3TXcvNzB0ZSs1Um5zVm5RRzY2REFLVWNTNThIWlRoNHN1L1lJQTQzTnRsTjF3eUs0QTJmVUhhV3kyaFFDeFpWOGI3ZjBjZEpVdU9wQzBkTFpudS9SZ01ZL0R4NVFnb2dDd1Avb2hoOVg5WDlSOUJLanRpVERieTJrNG92VUZ1ZStrTHlCMWlwQkRESnRlYUJsTUljRHZvVGM1TEFDMENHZ2RURFBiK3p2OERsMW9NdStuTlZBRkpzaGlPR0F1UUJvQmZndTUzbUVCZmd5OEhFeW9kU2pkMGo1OFNVVEV6OUJBQkNZbHJSNFdEL2VObDBGUytzcm5iSWNGK05MN0RJUWREVXhXV2R3dmFuVVRHb2pTb0twaGdueHVlbkJmOUFQSUNkUTdYb281ZmU1MW1wRWdZQVFVYyt6aERNWmRvd1ZnWU5GM0VpcCtJQUR6cnRPZ25HS0NvbUo0S0xOdUgzRjQwdkxhTkIyS2ZSeHIxRDZjU1N2cnMvUnJ5SFZnVEpQelhUUzEwTVBqTTludTEvTFpHZW9ZeWNGWk9oajdLQzJ0VG9JR1pkVWZNS0lkVnZpK01NR1lOUUg0MG41Y3BxVzFLU2IybUZhQWJPUUQrQU1FQUhPYVh1eUZBUFFyQ3dEaE9rZnljSllPeER4Q2k2c1RvSUhRdEM0QXE5aXFDZmJIUEt3MVFRbm05QVdyOTJzakU1d0pORExCRnpvVDVNTUVFTjZ1Q1NJd0tiYm1oQlBDQ2M5eTJnbjdKeXN0TzJHTGNFSXBabmZDTU1CbUdDSmRDd0VRaHBKQklycHpEeExSN1FhSlNIcGFtNHJsUGl6a05oNDF1MURkRlVxQWZjNms0c2g3YmFUaXc4SUJCOERicEJndG9aTXh1aEJUK2lXMlVHQVFHWGFaSTN4SFo1c0pFRmYyalVreHVwTFdOaGRGRXZyWnFQTlZWR1VLRzVXZGdXYmxHS1YxYldPQmhxYnI3QW1BTk10bkY2RTUrc2IzUEtPOThnNS9Bb0NYV2Nlc0dEUWthS04ydWlFSnpIdk50Q0d4MkpJbGFPT1QzTk5mMmpIbXJtblBnNlp3dkNUd3N0cVVvbkVVUWtBVDIvL3oxdzM2UWJuRmJudU8xbGtJQVhYQkozNFdqdWtFb3Z0Qks4YzBESmlyMXpyOE1ORjJyeVNpSTdmeENQMXRJVTlZYURnUWFueG4wZUJoc3BrRW1sdDVtcjFyOGpSREpLQ2VJNStqcUFBeHhob2l3T1JwcHN3dzgvZTM5VmhGdU9DaHljSU1rSU9BSklNNDM5YmoxSUpHVGtjUGh6YUt2ekdvWkNpblFJeFJXSkRiR1ovRldVZnBuZ0NsZVROZG1rcmhJZ0FBQUFCSlJVNUVya0pnZ2c9PQoiIHNpemVzPSIzMngzMiIvPgogICAgPGxpbmsgcmVsPSJpY29uIiB0eXBlPSJpbWFnZS9wbmciIGhyZWY9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBQkFBQUFBUUNBWUFBQUFmOC85aEFBQUJoRWxFUVZSNEFaVlRBMHgxY1J6OWpQSEQ3RENuS2MxaHRtczJzcHY1c212SU5TL2JqWEY0eHBSdHpIdnZmMC8vODJ6YzdmTGcvdmpKLzFBVUVTOFVXNk5ReEtHOFAvRjBQamNTY3hNRGhjbzNTVklKWWJWcWo2Y3h2bDJJOXJsTThCeVR6OXJqS1JDVFpvM2tCaFBQM2p5YjBUU1ZpcEtCVDBIUFJvbmRQSnNnVGVaOVRPUUhGY1gxNC85SkRIdldqZjl6bVRTNmMyWm9yait2YXhwd2NuY1FJRHk1MjhlR3B0RVpTUXFvc2RlRWVUTm5GekZVSkxWamYzSDdZbkcvYTQ0bkhWR3d3aXlTQzNoOE8wYmw4TzhBZy9LaEgzaDhQM0c5eThJV2dGcEc4TVJLOCtQa2JqSE1GMnRnT24zTGVlaVl5MExIZkRaNmwzTFJOSjBHMC9tSzVKU1FpN2JaREZEclkwRFFmTDRxeVRUSXA1Z256V2dBNDlreXBuWkxmUXhDcFBBclJBckhnU213RUpyanFkaUxlT1Fvb3J1TmJBMEJ0b290OHpjNHZ0M0hwcmJKMmNaazJGeHQ5QXlTQ1hWUkR0TDFzOUh4ZDk5UkZyTTBZU1NoeE1Rb1ZyeEcyZCtra2Vtd0ppd1NLODJUenh3Y1l0ektBSEYwNjh3dEZJbisvQTl0TW1xSTdNeHpHQUFBQUFCSlJVNUVya0pnZ2c9PQoiIHNpemVzPSIxNngxNiIvPgogICAgPHN0eWxlPgogICAgICAgIGh0bWwgewogICAgICAgICAgICBib3gtc2l6aW5nOiBib3JkZXItYm94OwogICAgICAgICAgICBvdmVyZmxvdzogLW1vei1zY3JvbGxiYXJzLXZlcnRpY2FsOwogICAgICAgICAgICBvdmVyZmxvdy15OiBzY3JvbGw7CiAgICAgICAgfQoKICAgICAgICAqLAogICAgICAgICo6YmVmb3JlLAogICAgICAgICo6YWZ0ZXIgewogICAgICAgICAgICBib3gtc2l6aW5nOiBpbmhlcml0OwogICAgICAgIH0KCiAgICAgICAgYm9keSB7CiAgICAgICAgICAgIG1hcmdpbjogMDsKICAgICAgICAgICAgYmFja2dyb3VuZDogI2ZhZmFmYTsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cgo8Ym9keT4KPGRpdiBpZD0ic3dhZ2dlci11aSI+PC9kaXY+CjxzY3JpcHQgc3JjPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9zd2FnZ2VyLXVpLzMuMTguMi9zd2FnZ2VyLXVpLWJ1bmRsZS5qcyI+PC9zY3JpcHQ+CjxzY3JpcHQgc3JjPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9zd2FnZ2VyLXVpLzMuMTguMi9zd2FnZ2VyLXVpLXN0YW5kYWxvbmUtcHJlc2V0LmpzIj48L3NjcmlwdD4KPHNjcmlwdD4KCiAgICB2YXIgc3BlYyA9IHt7LlNwZWN9fTsKCglzcGVjID0gSlNPTi5wYXJzZShzcGVjKTsKCiAgICB3aW5kb3cub25sb2FkID0gZnVuY3Rpb24gKCkgewogICAgICAgIGNvbnN0IHVpID0gU3dhZ2dlclVJQnVuZGxlKHsKICAgICAgICAgICAgc3BlYzogc3BlYywKICAgICAgICAgICAgZG9tX2lkOiAnI3N3YWdnZXItdWknLAogICAgICAgICAgICBkZWVwTGlua2luZzogdHJ1ZSwKICAgICAgICAgICAgcHJlc2V0czogWwogICAgICAgICAgICAgICAgU3dhZ2dlclVJQnVuZGxlLnByZXNldHMuYXBpcywKICAgICAgICAgICAgICAgIFN3YWdnZXJVSVN0YW5kYWxvbmVQcmVzZXQuc2xpY2UoMSkgLy8gaGVyZQogICAgICAgICAgICBdLAogICAgICAgICAgICBsYXlvdXQ6ICJTdGFuZGFsb25lTGF5b3V0IgogICAgICAgIH0pOwogICAgICAgIHdpbmRvdy51aSA9IHVpOwogICAgfQo8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+CmAKCmZ1bmMgU2VydmVySFRUUCh3IGh0dHAuUmVzcG9uc2VXcml0ZXIsIHIgKmh0dHAuUmVxdWVzdCkgewoJaWYgc2VydmVySnNvbiA9PSAiIiB7CgkJc2VydmVySnNvbiA9IHBhcnNlKCkKCQlpZiBzZXJ2ZXJKc29uID09ICIiIHsKCQkJc2VydmVySnNvbiA9ICJ7fSIKCQl9Cgl9Cgl0LCBlcnIgOj0gdGVtcGxhdGUuTmV3KCJzd2FnZ2VyIikuUGFyc2UoaHRtbFRlbXApCglpZiBlcnIgIT0gbmlsIHsKCQl3LldyaXRlKFtdYnl0ZShlcnIuRXJyb3IoKSkpCgkJcmV0dXJuCgl9CgllcnIgPSB0LkV4ZWN1dGUodywgbWFwW3N0cmluZ11zdHJpbmd7IlNwZWMiOiBzZXJ2ZXJKc29ufSkKCWlmIGVyciAhPSBuaWwgewoJCXcuV3JpdGUoW11ieXRlKGVyci5FcnJvcigpKSkKCX0KfQo="
+var templateServer = "// +build sample_swagger\n" +
+	"\n" +
+	"package sample_swagger\n" +
+	"\n" +
+	"import (\n" +
+	"	\"html/template\"\n" +
+	"	\"net/http\"\n" +
+	")\n" +
+	"\n" +
+	"var serverJson string\n" +
+	"\n" +
+	"var htmlTemp = `\n" +
+	"<!-- HTML for static distribution bundle build -->\n" +
+	"<!DOCTYPE html>\n" +
+	"<html lang=\"en\">\n" +
+	"<head>\n" +
+	"    <meta charset=\"UTF-8\">\n" +
+	"    <title>Swagger UI</title>\n" +
+	"    <link rel=\"stylesheet\" type=\"text/css\"\n" +
+	"          href=\"https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.18.2/swagger-ui.css\">\n" +
+	"    <link rel=\"icon\" type=\"image/png\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEPElEQVR4Ab1XA8xlWQx+a9u2bcRex17btj1G8Nu2bdu2bfOi02/yzjN/NWnuYdtbH42joKrqqbKy+aSsSD/yN0KS16t4PAKU5I0a/kZhD2dwVrNToKjyhUz4e0WR+ohUcgRwlgX5ke9ebI++nT+W3mYiU4Iwr9HwdAOVtHpSYuXPFF70IZDHP1Fxqwfv1RPOCMBdpvEuaDnJXLmY/yBOEFvfXKa8puP0b8Td9Jmnxib+E3EX5TYe4ztLOqFZiATQdJT51XyhQVyu6gqhX4KvAXGn8Jegq6myMwg0hFmamPa1dv9cMGfHopD8t0FsWxic/yaxwxoIoV5sy+ZxgrlHxisgsCPonvaioRAJFn0CDgd1AUPy38LFHcWgvDdI0Idjmqr+QvbYCWKo6go2uvi1zzlU0RFAq+tzNDRVa5fR4FQNrW7Mw/70te+5RnsVnQG66DAKUcS58HZTh4su/YIA43NtlN1wyK4A2fUHaWy2hQCxZV8b7f0cdJUuOpC0dLZnu/RgMY/Dx5QgogCwP/ohh9X9X9R9BKjtiTDby2k4ovUFue+kLyB1ipBDDJteaBlMIcDvoTc5LAC0CGgdTDPb+zv8Dl1oMu+nNVAFJshiOGAuQBoBfgu53mEBfgy8HEyodSjd0j58SUTEz9BABCYlrR4WD/eNl0FS+srnbIcF+NL7DIQdDUxWWdwvanUTGojSoKphgnxuenBf9APICdQ7Xoo5fe51mpEgYAQUc+zhDMZdowVgYNF3Eip+IADzrtOgnGKComJ4KLNuH3F40vLaNB2KfRxr1D6cSSvrs/RryHVgTJPzXTS10MPjM9nu1/LZGeoYycFZOhj7KC2tToIGZdUfMKIdVvi+MMGYNQH40n5cpqW1KSb2mFaAbOQD+AMEAHOaXuyFAPQrCwDhOkfycJYOxDxCi6sToIHQtC4Aq9iqCfbHPKw1QQnm9AWr92sjE5wJNDLBFzoT5MMEEN6uCSIwKbbmhBPCCc9y2gn7JystO2GLcEIpZnfCMMBmGCJdCwEQhpJBIrpzDxLR7QaJSHpam4rlPizkNh41u1DdFUqAfc6k4sh7baTiw8IBB8DbpBgtoZMxuhBT+iW2UGAQGXaZI3xHZ5sJEFf2jUkxupLWNhdFEvrZqPNVVGUKG5WdgWblGKV1bWOBhqbr7AmANMtnF6E5+sb3PKO98g5/AoCXWcesGDQkaKN2uiEJzHvNtCGx2JIlaOOT3NNf2jHmrmnPg6ZwvCTwstqUonEUQkAT2//z1w36QbnFbnuO1lkIAXXBJ34WjukEovtBK8c0DJir1zr8MNF2rySiI7fxCP1tIU9YaDgQanxn0eBhspkEmlt5mr1r8jRDJKCeI5+jqAAxxhoiwORppsww8/e39VhFuOChycIMkIOAJIM439bj1IJGTkcPhzaKvzGoZCinQIxRWJDbGZ/FWUfpngCleTNdmkrhIgAAAABJRU5ErkJggg==\n" +
+	"\" sizes=\"32x32\"/>\n" +
+	"    <link rel=\"icon\" type=\"image/png\" href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhElEQVR4AZVTA0x1cRz9jPHD7DCnKc1htms2spv5smvINS/bjXF4xpRtzHvvf0//82zc7fLg/vjJ/1AUES8UW6NQxKG8P/F0PjcScxMDhco3SVIJYbVqj6cxvl2I9rlM8ByTz9rjKRCTZo3kBhPP3jyb0TSVipKBT0HPRondPJsgTeZ9TOQHFcX14/9JDHvWjf9zmTS6c2Zorj+vaxpwcncQIDy528eGptEZSQqosdeEeTNnFzFUJLVjf3H7YnG/a44nHVGwwiySC3h8O0bl8O8Ag/KhH3h8P3G9y8IWgFpG8MRK8+PkbjHMF2tgOn3LeeiYy0LHfDZ6l3LRNJ0G0/mK5JSQi7bZDFDrY0DQfL4qyTTIp5gnzWgA49kypnZLfQxCpPArRArHgSmwEJrjqdiLeOQooruNbA0Btoot8zc4vt3HprbJ2cZk2Fxt9AySCXVRDtL1s9Hxd99RFrM0YSShxMQoVrxG2d+kkemwJiwSK82TzxwcYtzKAHF068wtFIn+/A9tMmqI7MxzGAAAAABJRU5ErkJggg==\n" +
+	"\" sizes=\"16x16\"/>\n" +
+	"    <style>\n" +
+	"        html {\n" +
+	"            box-sizing: border-box;\n" +
+	"            overflow: -moz-scrollbars-vertical;\n" +
+	"            overflow-y: scroll;\n" +
+	"        }\n" +
+	"\n" +
+	"        *,\n" +
+	"        *:before,\n" +
+	"        *:after {\n" +
+	"            box-sizing: inherit;\n" +
+	"        }\n" +
+	"\n" +
+	"        body {\n" +
+	"            margin: 0;\n" +
+	"            background: #fafafa;\n" +
+	"        }\n" +
+	"    </style>\n" +
+	"</head>\n" +
+	"\n" +
+	"<body>\n" +
+	"<div id=\"swagger-ui\"></div>\n" +
+	"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.18.2/swagger-ui-bundle.js\"></script>\n" +
+	"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.18.2/swagger-ui-standalone-preset.js\"></script>\n" +
+	"<script>\n" +
+	"\n" +
+	"    var spec = {{.Spec}};\n" +
+	"\n" +
+	"	spec = JSON.parse(spec);\n" +
+	"\n" +
+	"    window.onload = function () {\n" +
+	"        const ui = SwaggerUIBundle({\n" +
+	"            spec: spec,\n" +
+	"            dom_id: '#swagger-ui',\n" +
+	"            deepLinking: true,\n" +
+	"            presets: [\n" +
+	"                SwaggerUIBundle.presets.apis,\n" +
+	"                SwaggerUIStandalonePreset.slice(1) // here\n" +
+	"            ],\n" +
+	"            layout: \"StandaloneLayout\"\n" +
+	"        });\n" +
+	"        window.ui = ui;\n" +
+	"    }\n" +
+	"</script>\n" +
+	"</body>\n" +
+	"</html>\n" +
+	"`\n" +
+	"\n" +
+	"func ServerHTTP(w http.ResponseWriter, r *http.Request) {\n" +
+	"	if serverJson == \"\" {\n" +
+	"		serverJson = parse()\n" +
+	"		if serverJson == \"\" {\n" +
+	"			serverJson = \"{}\"\n" +
+	"		}\n" +
+	"	}\n" +
+	"	t, err := template.New(\"swagger\").Parse(htmlTemp)\n" +
+	"	if err != nil {\n" +
+	"		w.Write([]byte(err.Error()))\n" +
+	"		return\n" +
+	"	}\n" +
+	"	err = t.Execute(w, map[string]string{\"Spec\": serverJson})\n" +
+	"	if err != nil {\n" +
+	"		w.Write([]byte(err.Error()))\n" +
+	"	}\n" +
+	"}\n" +
+	""
 
-var templateServer2Base64 = "Ly8gK2J1aWxkICFzYW1wbGVfc3dhZ2dlcgoKcGFja2FnZSBzYW1wbGVfc3dhZ2dlcgoKaW1wb3J0ICJuZXQvaHR0cCIKCmZ1bmMgU2VydmVySFRUUCh3IGh0dHAuUmVzcG9uc2VXcml0ZXIsIHIgKmh0dHAuUmVxdWVzdCkgewoJdy5Xcml0ZShbXWJ5dGUoYFBsZWFzZSB1c2UgYnVpbGQgdGFnICJzYW1wbGVfc3dhZ2dlciIgdG8gb3BlbiBzd2FnZ2VyIWApKQp9Cg=="
+var templateServer2 = "// +build !sample_swagger\n" +
+	"\n" +
+	"package sample_swagger\n" +
+	"\n" +
+	"import \"net/http\"\n" +
+	"\n" +
+	"func ServerHTTP(w http.ResponseWriter, r *http.Request) {\n" +
+	"       w.Write([]byte(`Please use build tag \"sample_swagger\" to open swagger!`))\n" +
+	"}\n" +
+	""
 
-const templateVars = `// +build sample_swagger
-
-package sample_swagger
-
-import (
-	{{Imports}}
-)
-
-var generatorJson = {{GeneratorJson}}
-
-var generatorModels = []interface{}{
-	{{GeneratorModels}}
-}
-
-`
+const templateVars = "// +build sample_swagger\n" +
+	"\n" +
+	"package sample_swagger\n" +
+	"\n" +
+	"import (\n" +
+	"       {{Imports}}\n" +
+	")\n" +
+	"\n" +
+	"var generatorJson = {{GeneratorJson}}\n" +
+	"\n" +
+	"var generatorModels = []interface{}{\n" +
+	"       {{GeneratorModels}}\n" +
+	"}\n" +
+	""

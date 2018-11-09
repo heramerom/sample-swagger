@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"github.com/heramerom/sample-swagger/template"
@@ -34,13 +33,13 @@ func main() {
 	}
 	api := NewApi()
 
-	for _, path := range args {
-		b, err := isDirectory(path)
+	for _, pth := range args {
+		b, err := isDirectory(pth)
 		if err != nil {
 			continue
 		}
 		if b {
-			filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+			filepath.Walk(pth, func(path string, info os.FileInfo, err error) error {
 				if !isSourceFile(path) {
 					return nil
 				}
@@ -48,10 +47,10 @@ func main() {
 				return nil
 			})
 		} else {
-			if !isSourceFile(path) {
+			if !isSourceFile(pth) {
 				continue
 			}
-			parseFile(path, api)
+			parseFile(pth, api)
 		}
 	}
 
@@ -63,7 +62,7 @@ func main() {
 
 func dumpFile(api *Api) {
 
-	err := os.MkdirAll(*out, 0777)
+	err := os.MkdirAll(*out, 0644)
 	if err != nil {
 		fmt.Printf("mkdir error: %s", err.Error())
 		os.Exit(1)
@@ -71,29 +70,25 @@ func dumpFile(api *Api) {
 
 	js := api.Json()
 
-	tm, _ := base64.StdEncoding.DecodeString(templateModelBase64)
-	err = writeFile("model.go", tm)
+	err = writeFile("model.go", []byte(templateModel))
 	if err != nil {
 		fmt.Println("write file error:", err.Error())
 		os.Exit(1)
 	}
 
-	pm, _ := base64.StdEncoding.DecodeString(templateParseBase64)
-	err = writeFile("parse.go", pm)
+	err = writeFile("parse.go", []byte(templateParser))
 	if err != nil {
 		fmt.Println("write file error:", err.Error())
 		os.Exit(1)
 	}
 
-	sm, _ := base64.StdEncoding.DecodeString(templateServerBase64)
-	err = writeFile("server.go", sm)
+	err = writeFile("server.go", []byte(templateServer))
 	if err != nil {
 		fmt.Println("write file error:", err.Error())
 		os.Exit(1)
 	}
 
-	s2m, _ := base64.StdEncoding.DecodeString(templateServer2Base64)
-	err = writeFile("server2.go", s2m)
+	err = writeFile("server2.go", []byte(templateServer2))
 	if err != nil {
 		fmt.Println("write file error:", err.Error())
 		os.Exit(1)

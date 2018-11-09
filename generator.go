@@ -29,7 +29,7 @@ func (a *Api) AddDefinitions(definitions ...definition) {
 }
 
 func (a *Api) Json() string {
-	bs, _ := json.Marshal(a.swagger)
+	bs, _ := json.MarshalIndent(a.swagger, "", "  ")
 	return string(bs)
 }
 
