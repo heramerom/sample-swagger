@@ -80,6 +80,7 @@ type Definition struct {
 	AdditionalProperties *Definition            `json:"additionalProperties,omitempty"`
 	Ref                  string                 `json:"$ref,omitempty"`
 }
+
 type Swagger struct {
 	Swagger     string                 `json:"swagger"`
 	Info        *Info                  `json:"info"`

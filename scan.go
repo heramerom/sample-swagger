@@ -87,3 +87,39 @@ func (s *Scanner) nextString(sep ...byte) string {
 	}
 	return strings.TrimSpace(buf.String())
 }
+
+type FileScanner struct {
+	*bufio.Scanner
+	line int
+	file string
+	fp   *os.File
+}
+
+func newFileScanner(f string) (fc *FileScanner, err error) {
+	fp, err := os.Open(f)
+	if err != nil {
+		return nil, err
+	}
+	return &FileScanner{
+		line:    1,
+		file:    f,
+		fp:      fp,
+		Scanner: bufio.NewScanner(fp),
+	}, nil
+}
+
+func (scanner *FileScanner) Close() {
+	if scanner.fp != nil {
+		scanner.fp.Close()
+	}
+}
+
+func (scanner *FileScanner) Scan() bool {
+	return scanner.Scanner.Scan()
+}
+
+func (scanner *FileScanner) Text() string {
+	line := scanner.Scanner.Text()
+	scanner.line++
+	return line
+}

@@ -30,7 +30,7 @@ func parse() string {
 	var swagger Swagger
 	err := json.Unmarshal([]byte(generatorJson), &swagger)
 	if err != nil {
-		fmt.Printf("unmarshal error: %s\n", err.Error())
+		fmt.Printf("unmarshal error: %s", err.Error())
 		return ""
 	}
 
@@ -54,7 +54,7 @@ func parse() string {
 	}
 	bs, err := json.Marshal(swagger)
 	if err != nil {
-		fmt.Printf("marshal error: %s\n", err.Error())
+		fmt.Printf("marshal error: %s", err.Error())
 		return ""
 	}
 	return string(bs)
@@ -161,11 +161,13 @@ func isNestedObject(name string) bool {
 }
 
 func parseField(value reflect.Value, typ reflect.Type, fd reflect.StructField) *model {
+	// unexport field
 	if fd.Name[0] > 'Z' || fd.Name[0] < 'A' {
 		return nil
 	}
 	var f model
 	f.Name = strings.Split(fd.Tag.Get("json"), ",")[0]
+	// ignore field
 	if f.Name == "-" {
 		return nil
 	}

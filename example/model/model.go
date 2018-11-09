@@ -59,3 +59,9 @@ type NestObject struct {
 		Age  int    `json:"age"`
 	} `json:"data"`
 }
+
+// @sw:m
+type DefaultObj struct {
+	Name string
+	Age  int
+}

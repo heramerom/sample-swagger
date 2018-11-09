@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"github.com/heramerom/sample-swagger/template"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -17,47 +15,22 @@ var verbose = flag.Bool("v", false, "verbose")
 
 var out = flag.String("o", "sample-swagger", "out put dir")
 
+var pkg = flag.String("pkg", "sample_swagger", "pkg name")
+
+var (
+	gopath string
+)
+
 func debug(msg ...interface{}) {
 	if *verbose {
 		fmt.Println(msg...)
 	}
 }
 
-func main() {
-
-	flag.Parse()
-	args := flag.Args()
-	if len(args) == 0 {
-		fmt.Println("please input path")
-		os.Exit(1)
+func debugf(format string, args ...interface{}) {
+	if *verbose {
+		fmt.Printf(format, args...)
 	}
-	api := NewApi()
-
-	for _, pth := range args {
-		b, err := isDirectory(pth)
-		if err != nil {
-			continue
-		}
-		if b {
-			filepath.Walk(pth, func(path string, info os.FileInfo, err error) error {
-				if !isSourceFile(path) {
-					return nil
-				}
-				parseFile(path, api)
-				return nil
-			})
-		} else {
-			if !isSourceFile(pth) {
-				continue
-			}
-			parseFile(pth, api)
-		}
-	}
-
-	dumpFile(api)
-
-	fmt.Println("success!")
-
 }
 
 func dumpFile(api *Api) {
@@ -143,18 +116,15 @@ func isSourceFile(f string) bool {
 }
 
 func parseFile(f string, api *Api) {
-	file, err := os.Open(f)
+	fileScanner, err := newFileScanner(f)
 	if err != nil {
-		log.Printf("open file error: %s, error: %s", f, err.Error())
-		return
+		fmt.Printf("open file error: %s, error: %s", f, err.Error())
+		os.Exit(1)
 	}
-	defer file.Close()
-
-	fileScanner := bufio.NewScanner(file)
+	defer fileScanner.Close()
+	var defaultPkgPath, defaultPkgName string
 	var currentRouter = emptyRouter
-	num := 0
 	for fileScanner.Scan() {
-		num++
 		line := fileScanner.Text()
 		if !strings.Contains(line, "@sw:") {
 			continue
@@ -164,7 +134,7 @@ func parseFile(f string, api *Api) {
 			continue
 		}
 		line = strings.Replace(line, "//", "", 1)
-		scanner := newScanner(line, f, num)
+		scanner := newScanner(line, f, fileScanner.line)
 		cmd := scanner.nextString(' ', '\t')
 		cmd = strings.Replace(cmd, "@sw:", "", 1)
 		switch strings.ToLower(cmd) {
@@ -173,6 +143,7 @@ func parseFile(f string, api *Api) {
 				api.AddRouters(currentRouter)
 			}
 			currentRouter = parseRouter(scanner)
+			debugf("Found router: %s", currentRouter)
 		case "param", "p":
 			if reflect.DeepEqual(currentRouter, emptyRouter) {
 				continue
@@ -184,7 +155,17 @@ func parseFile(f string, api *Api) {
 			}
 			currentRouter.response = append(currentRouter.response, parseResponse(scanner))
 		case "model", "m":
-			def := parseModel(scanner)
+			if defaultPkgPath == "" {
+				defaultPkgName, defaultPkgPath, err = queryPkgName(gopath, f)
+				if err != nil {
+					fmt.Printf("can not get pkg name: %s, err: %s", f, err.Error())
+				}
+			}
+			def, err := parseModel(scanner, defaultPkgPath, defaultPkgName, fileScanner)
+			if err != nil {
+				debugf("file: %s, line: %s, syntax error: %s", fileScanner.file, fileScanner.line, err.Error())
+				continue
+			}
 			if reflect.DeepEqual(def, definition{}) {
 				continue
 			}
@@ -199,13 +180,14 @@ func parseFile(f string, api *Api) {
 			api.swagger.Host = scanner.nextString()
 
 		default:
-			debug("file:", f, "line:", num, "unsupport command:", cmd)
+			debugf("file: %s, line: %s, unsupport command: %s", fileScanner.file, fileScanner.line, cmd)
 		}
 	}
 	if !reflect.DeepEqual(currentRouter, emptyRouter) {
 		api.AddRouters(currentRouter)
 	}
 }
+
 func parseInfo(api *Api, s *Scanner) {
 	if api.swagger.Info == nil {
 		api.swagger.Info = &template.Info{}
@@ -228,4 +210,47 @@ func parseInfo(api *Api, s *Scanner) {
 	case "license.url":
 		api.swagger.Info.License.URL = line
 	}
+}
+
+func Init() {
+	gopath = queryGoPath()
+}
+
+func main() {
+
+	flag.Parse()
+	args := flag.Args()
+	if len(args) == 0 {
+		fmt.Println("please input path")
+		os.Exit(1)
+	}
+
+	Init()
+
+	api := NewApi()
+
+	for _, pth := range args {
+		b, err := isDirectory(pth)
+		if err != nil {
+			continue
+		}
+		if b {
+			filepath.Walk(pth, func(path string, info os.FileInfo, err error) error {
+				if !isSourceFile(path) {
+					return nil
+				}
+				parseFile(path, api)
+				return nil
+			})
+		} else {
+			if !isSourceFile(pth) {
+				continue
+			}
+			parseFile(pth, api)
+		}
+	}
+
+	dumpFile(api)
+
+	debug("success!!!")
 }

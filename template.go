@@ -535,7 +535,7 @@ var templateServer2 = "// +build !sample_swagger\n" +
 	"import \"net/http\"\n" +
 	"\n" +
 	"func ServerHTTP(w http.ResponseWriter, r *http.Request) {\n" +
-	"       w.Write([]byte(`Please use build tag \"sample_swagger\" to open swagger!`))\n" +
+	"   w.Write([]byte(`Please use build tag \"sample_swagger\" to open swagger!`))\n" +
 	"}\n" +
 	""
 
@@ -550,6 +550,6 @@ const templateVars = "// +build sample_swagger\n" +
 	"var generatorJson = {{GeneratorJson}}\n" +
 	"\n" +
 	"var generatorModels = []interface{}{\n" +
-	"       {{GeneratorModels}}\n" +
+	"{{GeneratorModels}}\n" +
 	"}\n" +
 	""

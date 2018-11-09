@@ -17,14 +17,14 @@ type Info struct {
 }
 
 type Router struct {
-	Tags        []string            `json:"tags"`
-	Summary     string              `json:"summary"`
-	Description string              `json:"description"`
-	OperationID string              `json:"operationId"`
-	Consumes    []string            `json:"consumes"`
-	Produces    []string            `json:"produces"`
-	Parameters  []Parameter         `json:"parameters"`
-	Responses   map[string]Response `json:"responses"`
+	Tags        []string            `json:"tags,omitempty"`
+	Summary     string              `json:"summary,omitempty"`
+	Description string              `json:"description,omitempty"`
+	OperationID string              `json:"operationId,omitempty"`
+	Consumes    []string            `json:"consumes,omitempty"`
+	Produces    []string            `json:"produces,omitempty"`
+	Parameters  []Parameter         `json:"parameters,omitempty"`
+	Responses   map[string]Response `json:"responses,omitempty"`
 }
 
 type Schema struct {
@@ -32,11 +32,11 @@ type Schema struct {
 }
 
 type Parameter struct {
-	In          string  `json:"in"`
-	Name        string  `json:"name"`
-	Type        string  `json:"type"`
-	Description string  `json:"description"`
-	Required    bool    `json:"required"`
+	In          string  `json:"in,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Type        string  `json:"type,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Required    bool    `json:"required,omitempty"`
 	Schema      *Schema `json:"schema,omitempty"`
 }
 
@@ -80,6 +80,7 @@ type Definition struct {
 	AdditionalProperties *Definition            `json:"additionalProperties,omitempty"`
 	Ref                  string                 `json:"$ref,omitempty"`
 }
+
 type Swagger struct {
 	Swagger     string                 `json:"swagger"`
 	Info        *Info                  `json:"info"`

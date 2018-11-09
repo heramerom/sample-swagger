@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	models "github.com/heramerom/sample-swagger/template"
 	"strconv"
 	"strings"
@@ -30,6 +32,10 @@ func (r *router) toMethod() models.Method {
 		method[v] = router
 	}
 	return models.Method(method)
+}
+
+func (r *router) String() string {
+	return fmt.Sprintf("[%s] %s %s", strings.Join(r.methods, ","), r.path, r.desc)
 }
 
 type param struct {
@@ -179,10 +185,31 @@ type definition struct {
 }
 
 // @sw:m import_path,package,desc
-func parseModel(s *Scanner) definition {
-	var def definition
+func parseModel(s *Scanner, pkgPath string, pkg string, scanner *FileScanner) (def definition, err error) {
 	def.path = s.nextString(',')
 	def.model = s.nextString(',')
 	def.desc = s.nextString()
-	return def
+	if def.path == "" {
+		def.path = pkgPath
+	}
+	if def.model == "" {
+		def.model, err = getNextModel(scanner)
+		def.model = pkg + "." + def.model
+	}
+	return
+}
+
+func getNextModel(scanner *FileScanner) (model string, err error) {
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "type") {
+			model = strings.Split(strings.TrimSpace(strings.Replace(line, "type", "", 1)), " ")[0]
+			return
+		}
+		if line != "" {
+			err = errors.New("syntax error: model define")
+			return
+		}
+	}
+	return
 }
